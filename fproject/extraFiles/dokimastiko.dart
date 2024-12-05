@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../lib/components/image_card.dart'; // Import the reusable widget
+import 'package:fproject/components/image_card.dart'; // Import the reusable widget
 
 class DokimastikoSection extends StatelessWidget {
   @override
