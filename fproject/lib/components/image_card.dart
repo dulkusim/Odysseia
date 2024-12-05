@@ -26,7 +26,7 @@ class CityCard extends StatelessWidget {
           SizedBox(height: 8),
           Text(
             cityName,
-            style: TextStyle(fontWeight: FontWeight.bold),
+            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
           ),
         ],
       ),
