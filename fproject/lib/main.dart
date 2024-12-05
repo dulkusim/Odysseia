@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'components/search_bar.dart'; // Import the reusable widget
+import 'components/image_card.dart'; // Import the reusable widget
+
 
 void main() {
   runApp(OdysseiaApp());
@@ -71,28 +73,168 @@ class OdysseiaAppBarState extends State<OdysseiaAppBar> {
 class BasedOnPreferencesText extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(20.0),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(
-            'Based on your preferences',
-            style: TextStyle(
-              fontWeight: FontWeight.bold,
-              fontSize: 22.0, // Adjust font size as needed
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        SizedBox(height: 15), // Add some spacing at the top
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20.0),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'Based on your preferences',
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 22.0,
+                ),
+              ),
+              IconButton(
+                icon: Icon(Icons.filter_alt),
+                iconSize: 30.0,
+                onPressed: () {
+                  // Handle filter button press
+                  print("Filter button pressed");
+                },
+              ),
+            ],
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20.0),
+          child: SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: Row(
+              children: [
+                CityCard(cityName: "Oslo"),
+                CityCard(cityName: "Bansko"),
+                CityCard(cityName: "Bolzano"),
+                CityCard(cityName: "Bucharest"), // Fourth city added
+              ],
             ),
           ),
-          IconButton(
-            icon: Icon(Icons.filter_alt),
-            iconSize: 30.0, // Adjust icon size as needed
-            onPressed: () {
-              // Handle filter button press
-              print("Filter button pressed");
-            },
+        ),
+        SizedBox(height: 30), // Add some spacing between sections
+
+        // "Weekend trips" section
+        WeekendTripsSection(),
+      ],
+    );
+  }
+}
+
+class WeekendTripsSection extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20.0),
+          child: Text(
+            'Weekend trips:',
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 22.0,
+            ),
           ),
-        ],
-      ),
+        ),
+        SizedBox(height: 9),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20.0),
+          child: SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: Row(
+              children: [
+                CityCard(cityName: "Volos"),
+                CityCard(cityName: "Nafplio"),
+                CityCard(cityName: "Aegina"),
+                CityCard(cityName: "Kalamata"),
+              ],
+            ),
+          ),
+        ),
+        SizedBox(height: 30),
+
+        // "Popular Destinations" section
+        PopularDestinationsSection(),
+      ],
+    );
+  }
+}
+
+class PopularDestinationsSection extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20.0),
+          child: Text(
+            'Popular Destinations:',
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 22.0,
+            ),
+          ),
+        ),
+        SizedBox(height: 9),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20.0),
+          child: SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: Row(
+              children: [
+                CityCard(cityName: "Paris"),
+                CityCard(cityName: "Los Angeles"),
+                CityCard(cityName: "Madrid"),
+                CityCard(cityName: "Rome"),
+              ],
+            ),
+          ),
+        ),
+        SizedBox(height: 30),
+
+        // "Friends visited" section
+        FriendsVisitedSection(),
+      ],
+    );
+  }
+}
+
+class FriendsVisitedSection extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20.0),
+          child: Text(
+            'Popular Destinations:',
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 22.0,
+            ),
+          ),
+        ),
+        SizedBox(height: 9),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20.0),
+          child: SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: Row(
+              children: [
+                CityCard(cityName: "Paris"),
+                CityCard(cityName: "Los Angeles"),
+                CityCard(cityName: "Madrid"),
+                CityCard(cityName: "Rome"),
+              ],
+            ),
+          ),
+        ),
+      ],
     );
   }
 }
