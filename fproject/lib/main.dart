@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'components/search_bar.dart'; // Import the reusable widget
 
 void main() {
   runApp(OdysseiaApp());
@@ -26,39 +27,32 @@ class OdysseiaAppBar extends StatefulWidget implements PreferredSizeWidget {
 
 class OdysseiaAppBarState extends State<OdysseiaAppBar> {
   bool _isSearching = false;
-  TextEditingController _searchController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
     return AppBar(
       title: _isSearching
-          ? TextField(
-              controller: _searchController,
-              autofocus: true,
-              style: TextStyle(color: const Color.fromARGB(255, 0, 0, 0)),
-              decoration: InputDecoration(
-                hintText: 'Search...',
-                hintStyle: TextStyle(color: Colors.white70),
-                border: InputBorder.none,
-              ),
-              onSubmitted: (value) {
-                // Handle search logic here
-                print('Search input: $value');
+          ? mySearchBar(
+              onSearch: (value) {
+                print('Search input: $value'); // Handle search logic here
+              },
+              onClose: () {
+                setState(() {
+                  _isSearching = false;
+                });
               },
             )
           : Text('Odysseia'),
       actions: [
-        IconButton(
-          icon: Icon(_isSearching ? Icons.close : Icons.search),
-          onPressed: () {
-            setState(() {
-              _isSearching = !_isSearching;
-              if (!_isSearching) {
-                _searchController.clear(); // Clear input on exit
-              }
-            });
-          },
-        ),
+        if (!_isSearching)
+          IconButton(
+            icon: Icon(Icons.search),
+            onPressed: () {
+              setState(() {
+                _isSearching = true;
+              });
+            },
+          ),
       ],
       bottom: PreferredSize(
         preferredSize: Size.fromHeight(4.0),
