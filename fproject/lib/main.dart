@@ -42,7 +42,10 @@ class OdysseiaAppBarState extends State<OdysseiaAppBar> {
                 });
               },
             )
-          : Text('Odysseia'),
+          : Text(
+            'Odysseia',
+            style: TextStyle(fontWeight: FontWeight.bold),
+          ),
       actions: [
         if (!_isSearching)
           IconButton(
@@ -68,17 +71,29 @@ class OdysseiaAppBarState extends State<OdysseiaAppBar> {
 class BasedOnPreferencesText extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Padding(
-          padding: const EdgeInsets.all(20.0),
-          child: Text(
+    return Padding(
+      padding: const EdgeInsets.all(20.0),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
             'Based on your preferences',
-            style: TextStyle(fontWeight: FontWeight.bold),
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 22.0, // Adjust font size as needed
+            ),
           ),
-        ),
-      ],
+          IconButton(
+            icon: Icon(Icons.filter_alt),
+            iconSize: 30.0, // Adjust icon size as needed
+            onPressed: () {
+              // Handle filter button press
+              print("Filter button pressed");
+            },
+          ),
+        ],
+      ),
     );
   }
 }
+
