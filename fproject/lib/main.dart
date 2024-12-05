@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'components/search_bar.dart'; // Import the reusable widget
 import 'components/image_card.dart'; // Import the reusable widget
 
-
 void main() {
   runApp(OdysseiaApp());
 }
@@ -13,7 +12,9 @@ class OdysseiaApp extends StatelessWidget {
     return MaterialApp(
       home: Scaffold(
         appBar: OdysseiaAppBar(),
-        body: BasedOnPreferencesText(),
+        body: SingleChildScrollView(
+          child: BasedOnPreferencesText(),
+        ),
       ),
     );
   }
@@ -26,7 +27,6 @@ class OdysseiaAppBar extends StatefulWidget implements PreferredSizeWidget {
   @override
   Size get preferredSize => Size.fromHeight(kToolbarHeight + 4.0);
 }
-
 class OdysseiaAppBarState extends State<OdysseiaAppBar> {
   bool _isSearching = false;
 
@@ -212,7 +212,7 @@ class FriendsVisitedSection extends StatelessWidget {
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 20.0),
           child: Text(
-            'Popular Destinations:',
+            'Your Friends Visited:',
             style: TextStyle(
               fontWeight: FontWeight.bold,
               fontSize: 22.0,
@@ -226,10 +226,10 @@ class FriendsVisitedSection extends StatelessWidget {
             scrollDirection: Axis.horizontal,
             child: Row(
               children: [
-                CityCard(cityName: "Paris"),
-                CityCard(cityName: "Los Angeles"),
-                CityCard(cityName: "Madrid"),
-                CityCard(cityName: "Rome"),
+                CityCard(cityName: "Milan"),
+                CityCard(cityName: "Barcelona"),
+                CityCard(cityName: "Thessaloniki"),
+                CityCard(cityName: "Warsaw"),
               ],
             ),
           ),
