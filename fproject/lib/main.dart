@@ -10,11 +10,61 @@ class OdysseiaApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      home: Scaffold(
-        appBar: OdysseiaAppBar(),
-        body: SingleChildScrollView(
-          child: BasedOnPreferencesText(),
-        ),
+      home: MainScreen(),
+    );
+  }
+}
+
+class MainScreen extends StatefulWidget {
+  @override
+  MainScreenState createState() => MainScreenState();
+}
+
+class MainScreenState extends State<MainScreen> {
+  int _selectedIndex = 0; // To track the selected navigation item
+
+  // A list of widgets to display for each tab
+  final List<Widget> _screens = [
+    SingleChildScrollView(child: BasedOnPreferencesText()), // Home screen
+    Center(child: Text("Challenges Screen", style: TextStyle(fontSize: 24))), // Battles screen
+    Center(child: Text("Map Screen", style: TextStyle(fontSize: 24))), // Map screen
+    Center(child: Text("Profile Screen", style: TextStyle(fontSize: 24))), // Profile screen
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: _selectedIndex == 0 ? OdysseiaAppBar() : null, // Show app bar only on the first screen
+      body: _screens[_selectedIndex], // Display the selected screen
+      bottomNavigationBar: BottomNavigationBar(
+        currentIndex: _selectedIndex,
+        onTap: (index) {
+          setState(() {
+            _selectedIndex = index;
+          });
+        },
+        items: [
+            BottomNavigationBarItem(
+            icon: Icon(Icons.home, size: 30),
+            label: 'Home',
+            ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.shield), // Placeholder for battles icon
+            label: 'Challenges',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.map, size: 25),
+            label: 'Map',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.person, size: 30),
+            label: 'Profile',
+          ),
+        ],
+        selectedItemColor: Colors.black, // Active icon color
+        unselectedItemColor: Colors.grey, // Inactive icon color
+        showUnselectedLabels: true,
+        type: BottomNavigationBarType.fixed,
       ),
     );
   }
@@ -45,7 +95,7 @@ class OdysseiaAppBarState extends State<OdysseiaAppBar> {
               },
             )
           : Text(
-            'Odysseia',
+            'OdySSeia',
             style: TextStyle(fontWeight: FontWeight.bold),
           ),
       actions: [
@@ -234,8 +284,46 @@ class FriendsVisitedSection extends StatelessWidget {
             ),
           ),
         ),
+        SizedBox(height: 30),
+        DokimastikoSection()
       ],
     );
   }
 }
 
+class DokimastikoSection extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20.0),
+          child: Text(
+            'Dokimi:',
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 22.0,
+            ),
+          ),
+        ),
+        SizedBox(height: 9),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20.0),
+          child: SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: Row(
+              children: [
+                CityCard(cityName: "Dokimi1"),
+                CityCard(cityName: "Dokimi2"),
+                CityCard(cityName: "Dokimi3"),
+                CityCard(cityName: "Dokimi4"),
+              ],
+            ),
+          ),
+        ),
+        SizedBox(height: 20),
+      ],
+    );
+  }
+}
