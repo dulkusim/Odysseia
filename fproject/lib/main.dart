@@ -2,8 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:fproject/components/city_image.dart';
 import 'components/search_bar.dart'; // Import the reusable widget
 import 'components/image_card.dart'; // Import the reusable widget
+import 'components/challenge_card.dart'; // Import the reusable widget
 import 'package:hugeicons/hugeicons.dart';
-
+import 'package:flutter/cupertino.dart';
 
 void main() {
   runApp(OdysseiaApp());
@@ -393,7 +394,14 @@ class CityPageInfo extends StatelessWidget {
           child: Divider(thickness: 1.0, height: 1.0, color: Colors.black),
         ),
       ),
-      body: CityImageSection(),
+      body: SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            CityImageSection(),
+          ],
+        ),
+      ),
     );
   }
 }
@@ -473,9 +481,25 @@ class CityPageDescState extends State<CityPageDescription> {
               ),
             ),
           ),
-        ],
+          SizedBox(height: 20),
+          DisplayChallengeCards(),
+      ],
       ),
     );
   }
 }
 
+class DisplayChallengeCards extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: List.generate(2, (index) {
+        return Padding(
+          padding: const EdgeInsets.symmetric(vertical: 8.0),
+          child: ChallengeCard(title: "Challenge $index", category: "Category $index"),
+        );
+      }),
+    );
+  }
+}
