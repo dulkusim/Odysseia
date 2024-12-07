@@ -4,7 +4,11 @@ import 'components/search_bar.dart'; // Import the reusable widget
 import 'components/image_card.dart'; // Import the reusable widget
 import 'components/challenge_card.dart'; // Import the reusable widget
 import 'package:hugeicons/hugeicons.dart';
-import 'package:flutter/cupertino.dart';
+import 'components/profile_header.dart'; // Import the reusable widget
+import 'components/awards_section.dart'; // Import the reusable widget
+import 'components/cities_section.dart'; // Import the reusable widget
+import 'components/friends_section.dart'; // Import the reusable widget
+import 'components/gallery_section.dart'; // Import the reusable widget
 
 void main() {
   runApp(OdysseiaApp());
@@ -32,7 +36,7 @@ class MainScreenState extends State<MainScreen> {
     SingleChildScrollView(child: BasedOnPreferencesText()), // Home screen
     Center(child: Text("Challenges Screen", style: TextStyle(fontSize: 24))), // Battles screen
     Center(child: Text("Map Screen", style: TextStyle(fontSize: 24))), // Map screen
-    Center(child: Text("Profile Screen", style: TextStyle(fontSize: 24))), // Profile screen
+    ProfileScreen(), // Profile screen
   ];
 
   @override
@@ -48,12 +52,12 @@ class MainScreenState extends State<MainScreen> {
           });
         },
         items: [
-            BottomNavigationBarItem(
+          BottomNavigationBarItem(
             icon: Icon(Icons.home, size: 30),
             label: 'Home',
             ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.shield), // Placeholder for battles icon
+            icon: Icon(HugeIcons.strokeRoundedSword03, size: 30), // Placeholder for battles icon
             label: 'Challenges',
           ),
           BottomNavigationBarItem(
@@ -500,6 +504,59 @@ class DisplayChallengeCards extends StatelessWidget {
           child: ChallengeCard(title: "Challenge $index", category: "Category $index"),
         );
       }),
+    );
+  }
+}
+
+
+class ProfileScreen extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(
+          "Profile",
+          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 25.0),
+        ),
+        centerTitle: true,
+        backgroundColor: Colors.white,
+        elevation: 0,
+        actions: [
+          IconButton(
+            padding: EdgeInsets.only(right: 10.0),
+            icon: Icon(Icons.settings, color: Colors.black, size: 30),
+            onPressed: () {
+              // Settings button action
+            },
+          ),
+        ],
+        bottom: PreferredSize(
+        preferredSize: Size.fromHeight(4.0),
+        child: Container(
+          color: Colors.black,
+          height: 3.0,
+        ),
+      ),
+      ),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.symmetric(horizontal: 20.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            SizedBox(height: 20),
+            ProfileHeader(), // Modularized profile header section
+            SizedBox(height: 30),
+            AwardsSection(), // Modularized awards section
+            SizedBox(height: 30),
+            CitiesSection(), // Modularized cities section
+            SizedBox(height: 30),
+            FriendsSection(), // Modularized friends section
+            SizedBox(height: 30),
+            GallerySection(), // Modularized gallery section
+            SizedBox(height: 20),
+          ],
+        ),
+      ),
     );
   }
 }
