@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 
 class SectionHeader extends StatelessWidget {
   final String title;
+  final VoidCallback onShowAllPressed;
 
-  const SectionHeader({Key? key, required this.title}) : super(key: key);
+  const SectionHeader({Key? key, required this.title, required this.onShowAllPressed})
+      : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -12,11 +14,14 @@ class SectionHeader extends StatelessWidget {
       children: [
         Text(
           title,
-          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
         ),
-        Text(
-          "Show all",
-          style: TextStyle(fontSize: 16, color: Colors.grey),
+        GestureDetector(
+          onTap: onShowAllPressed,
+          child: const Text(
+            "Show all",
+            style: TextStyle(fontSize: 16, color: Colors.blue),
+          ),
         ),
       ],
     );

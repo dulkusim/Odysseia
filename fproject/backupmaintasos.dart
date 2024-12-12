@@ -9,11 +9,6 @@ import 'components/awards_section.dart'; // Import the reusable widget
 import 'components/cities_section.dart'; // Import the reusable widget
 import 'components/friends_section.dart'; // Import the reusable widget
 import 'components/gallery_section.dart'; // Import the reusable widget
-import 'package:fproject/screens/awards_screen.dart';
-import 'package:fproject/screens/cities_screen.dart';
-import 'package:fproject/screens/friends_screen.dart';
-import 'package:fproject/screens/gallery_screen.dart';
-import 'package:fproject/screens/settings_screen.dart';
 
 void main() {
   runApp(OdysseiaApp());
@@ -514,13 +509,12 @@ class DisplayChallengeCards extends StatelessWidget {
 }
 
 
-
 class ProfileScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
+        title: Text(
           "Profile",
           style: TextStyle(fontWeight: FontWeight.bold, fontSize: 25.0),
         ),
@@ -529,71 +523,40 @@ class ProfileScreen extends StatelessWidget {
         elevation: 0,
         actions: [
           IconButton(
-            icon: const Icon(Icons.settings, color: Colors.black, size: 30),
+            padding: EdgeInsets.only(right: 10.0),
+            icon: Icon(Icons.settings, color: Colors.black, size: 30),
             onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const SettingsScreen()),
-              );
+              // Settings button action
             },
           ),
         ],
         bottom: PreferredSize(
-          preferredSize: const Size.fromHeight(4.0),
-          child: Container(
-            color: Colors.black,
-            height: 3.0,
-          ),
+        preferredSize: Size.fromHeight(4.0),
+        child: Container(
+          color: Colors.black,
+          height: 3.0,
         ),
+      ),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.symmetric(horizontal: 20.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const SizedBox(height: 20),
-            ProfileHeader(),
-            const SizedBox(height: 30),
-            AwardsSection(
-              onShowAllPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (_) => const AwardsScreen()),
-                );
-              },
-            ),
-            const SizedBox(height: 30),
-            CitiesSection(
-              onShowAllPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (_) => const CitiesScreen()),
-                );
-              },
-            ),
-            const SizedBox(height: 30),
-            FriendsSection(
-              onShowAllPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (_) => const FriendsScreen()),
-                );
-              },
-            ),
-            const SizedBox(height: 30),
-            GallerySection(
-              onShowAllPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (_) => const GalleryScreen()),
-                );
-              },
-            ),
-            const SizedBox(height: 20),
+            SizedBox(height: 20),
+            ProfileHeader(), // Modularized profile header section
+            SizedBox(height: 30),
+            AwardsSection(), // Modularized awards section
+            SizedBox(height: 30),
+            CitiesSection(), // Modularized cities section
+            SizedBox(height: 30),
+            FriendsSection(), // Modularized friends section
+            SizedBox(height: 30),
+            GallerySection(), // Modularized gallery section
+            SizedBox(height: 20),
           ],
         ),
       ),
     );
   }
 }
-
