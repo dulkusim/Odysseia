@@ -513,8 +513,6 @@ class DisplayChallengeCards extends StatelessWidget {
   }
 }
 
-
-
 class ProfileScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
