@@ -21,11 +21,11 @@ class GalleryScreen extends StatelessWidget {
       body: GridView.builder(
         padding: const EdgeInsets.all(16.0),
         gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 3,
-          crossAxisSpacing: 8.0,
-          mainAxisSpacing: 8.0,
+          crossAxisCount: 2,
+          crossAxisSpacing: 16.0, // Increased spacing
+          mainAxisSpacing: 16.0, // Increased spacing
         ),
-        itemCount: 9, // Example count
+        itemCount: 9,
         itemBuilder: (context, index) {
           return Container(
             decoration: BoxDecoration(
