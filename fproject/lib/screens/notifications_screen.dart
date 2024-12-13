@@ -4,10 +4,10 @@ class NotificationsScreen extends StatefulWidget {
   const NotificationsScreen({Key? key}) : super(key: key);
 
   @override
-  _NotificationsScreenState createState() => _NotificationsScreenState();
+  NotificationsScreenState createState() => NotificationsScreenState();
 }
 
-class _NotificationsScreenState extends State<NotificationsScreen> {
+class NotificationsScreenState extends State<NotificationsScreen> {
   bool enableNotifications = true;
 
   @override
