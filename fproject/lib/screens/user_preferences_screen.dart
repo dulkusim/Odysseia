@@ -15,7 +15,7 @@ class _UserPreferencesScreenState extends State<UserPreferencesScreen> {
   String _timeFormat = "12-hour";
 
   // State for Number of Challenges
-  int _numberOfChallenges = 3;
+  int _numberOfChallenges = 5;
 
   // State for Challenge Difficulty
   final Map<String, bool> _challengeDifficulty = {
@@ -50,90 +50,104 @@ class _UserPreferencesScreenState extends State<UserPreferencesScreen> {
             "Distance Format",
             style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20.0),
           ),
-              RadioListTile<String>(
-              value: "miles",
-              groupValue: _distanceFormat,
-              onChanged: (value) {
-                setState(() {
+          RadioListTile<String>(
+            value: "miles",
+            groupValue: _distanceFormat,
+            onChanged: (value) {
+              setState(() {
                 _distanceFormat = value!;
-                });
-              },
-              title: const Text("miles"),
-              contentPadding: EdgeInsets.zero,
-              ),
-              RadioListTile<String>(
-              value: "km",
-              groupValue: _distanceFormat,
-              onChanged: (value) {
-                setState(() {
+              });
+            },
+            title: const Text(
+              "Miles",
+              style: TextStyle(fontSize: 18.0),
+            ),
+            contentPadding: EdgeInsets.zero,
+          ),
+          RadioListTile<String>(
+            value: "km",
+            groupValue: _distanceFormat,
+            onChanged: (value) {
+              setState(() {
                 _distanceFormat = value!;
-                });
-              },
-              title: const Text("km"),
-              contentPadding: EdgeInsets.zero,
-              ),
-          const SizedBox(height: 20),
+              });
+            },
+            title: const Text(
+              "Km",
+              style: TextStyle(fontSize: 18.0),
+            ),
+            contentPadding: EdgeInsets.zero,
+          ),
+          const SizedBox(height: 15),
 
           // Time Format
           const Text(
             "Time Format",
-            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18.0),
+            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20.0),
           ),
+          RadioListTile<String>(
+            value: "12-hour",
+            groupValue: _timeFormat,
+            onChanged: (value) {
+              setState(() {
+                _timeFormat = value!;
+              });
+            },
+            title: const Text(
+              "12-hour",
+              style: TextStyle(fontSize: 18.0),
+            ),
+            contentPadding: EdgeInsets.zero,
+          ),
+          RadioListTile<String>(
+            value: "24-hour",
+            groupValue: _timeFormat,
+            onChanged: (value) {
+              setState(() {
+                _timeFormat = value!;
+              });
+            },
+            title: const Text(
+              "24-hour",
+              style: TextStyle(fontSize: 18.0),
+            ),
+            contentPadding: EdgeInsets.zero,
+          ),
+          const SizedBox(height: 15),
+
+          // Number of Challenges
           Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Expanded(
-                child: RadioListTile<String>(
-                  value: "12-hour",
-                  groupValue: _timeFormat,
-                  onChanged: (value) {
-                    setState(() {
-                      _timeFormat = value!;
-                    });
-                  },
-                  title: const Text("12-hour"),
-                ),
+              const Text(
+                "Number of Challenges",
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20.0),
               ),
-              Expanded(
-                child: RadioListTile<String>(
-                  value: "24-hour",
-                  groupValue: _timeFormat,
+              Padding(
+                padding: const EdgeInsets.only(right: 20.0),
+                child: DropdownButton<int>(
+                  value: _numberOfChallenges,
                   onChanged: (value) {
                     setState(() {
-                      _timeFormat = value!;
+                      _numberOfChallenges = value!;
                     });
                   },
-                  title: const Text("24-hour"),
+                  items: [5, 10, 12, 15].map((int value) {
+                    return DropdownMenuItem<int>(
+                      value: value,
+                      child: Text("$value"),
+                    );
+                  }).toList(),
                 ),
               ),
             ],
           ),
           const SizedBox(height: 20),
 
-          // Number of Challenges
-          const Text(
-            "Number of Challenges",
-            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18.0),
-          ),
-          DropdownButton<int>(
-            value: _numberOfChallenges,
-            onChanged: (value) {
-              setState(() {
-                _numberOfChallenges = value!;
-              });
-            },
-            items: List.generate(10, (index) {
-              return DropdownMenuItem<int>(
-                value: index + 1,
-                child: Text("${index + 1}"),
-              );
-            }),
-          ),
-          const SizedBox(height: 20),
-
           // Challenge Difficulty
           const Text(
             "Challenge Difficulty",
-            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18.0),
+            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20.0),
           ),
           Column(
             children: _challengeDifficulty.keys.map((difficulty) {
