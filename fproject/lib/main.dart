@@ -158,8 +158,14 @@ class BasedOnPreferencesText extends StatelessWidget {
                 icon: Icon(Icons.filter_alt),
                 iconSize: 30.0,
                 onPressed: () {
-                  // Handle filter button press
-                  print("Filter button pressed");
+                  // Show the filter modal
+                  showModalBottomSheet(
+                    context: context,
+                    builder: (context) {
+                      return FilterBottomSheet();
+                    },
+                    backgroundColor: Colors.transparent,
+                  );
                 },
               ),
             ],
@@ -184,6 +190,82 @@ class BasedOnPreferencesText extends StatelessWidget {
         // "Weekend trips" section
         WeekendTripsSection(),
       ],
+    );
+  }
+}
+
+// Filter Modal Bottom Sheet
+class FilterBottomSheet extends StatefulWidget {
+  @override
+  FilterBottomSheetState createState() => FilterBottomSheetState();
+}
+
+class FilterBottomSheetState extends State<FilterBottomSheet> {
+  final Map<String, bool> _filters = {
+    'Wine': false,
+    'Sights': false,
+    'Rest': false,
+    'Hiking': false,
+    'Beach': false,
+  };
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.only(
+          topLeft: Radius.circular(20),
+          topRight: Radius.circular(20),
+        ),
+      ),
+      padding: const EdgeInsets.all(20.0),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Filter by Preferences',
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 18.0,
+            ),
+          ),
+          SizedBox(height: 10),
+          Column(
+            children: _filters.keys.map((filter) {
+              return CheckboxListTile(
+                title: Text(filter),
+                value: _filters[filter],
+                onChanged: (bool? value) {
+                  setState(() {
+                    _filters[filter] = value!;
+                  });
+                },
+              );
+            }).toList(),
+          ),
+          SizedBox(height: 10),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.pop(context); // Close the modal
+              print('Selected Filters: ${_filters.entries.where((e) => e.value).map((e) => e.key).toList()}');
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.deepPurple,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(20.0),
+              ),
+            ),
+            child: Center(
+              child: Text(
+              'Apply Filters',
+              style: TextStyle(color: Colors.white, fontSize: 18),
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
