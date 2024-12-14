@@ -25,49 +25,69 @@ class SettingsScreen extends StatelessWidget {
         padding: const EdgeInsets.symmetric(vertical: 10.0),
         children: [
           ListTile(
-            title: const Text("Account"),
-            leading: const Icon(Icons.person),
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (_) => const AccountSettingsScreen()),
-              );
-            },
+        title: const Text(
+          "Account",
+          style: TextStyle(fontSize: 22.0),
+        ),
+        leading: const Icon(Icons.person, size: 30.0),
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => const AccountSettingsScreen()),
+          );
+        },
           ),
+          const Divider(color: Colors.grey),
           ListTile(
-            title: const Text("Notifications"),
-            leading: const Icon(Icons.notifications),
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (_) => const NotificationsScreen()),
-              );
-            },
+        title: const Text(
+          "Notifications",
+          style: TextStyle(fontSize: 22.0),
+        ),
+        leading: const Icon(Icons.notifications, size: 30.0),
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => const NotificationsScreen()),
+          );
+        },
           ),
+          const Divider(color: Colors.grey),
           ListTile(
-            title: const Text("User Preferences"),
-            leading: const Icon(Icons.settings),
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (_) => const UserPreferencesScreen()),
-              );
-            },
+        title: const Text(
+          "User Preferences",
+          style: TextStyle(fontSize: 22.0),
+        ),
+        leading: const Icon(Icons.settings, size: 30.0),
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => const UserPreferencesScreen()),
+          );
+        },
           ),
+          const Divider(color: Colors.grey),
           ListTile(
-            title: const Text("Rate this app"),
-            leading: const Icon(Icons.star),
-            onTap: () {
-              // Implement rate app logic
-            },
+        title: const Text(
+          "Rate this app",
+          style: TextStyle(fontSize: 22.0),
+        ),
+        leading: const Icon(Icons.star, size: 30.0),
+        onTap: () {
+          // Implement rate app logic
+        },
           ),
+          const Divider(color: Colors.grey),
           ListTile(
-            title: const Text("Log out"),
-            leading: const Icon(Icons.logout),
-            onTap: () {
-              // Implement log out logic
-            },
+        title: const Text(
+          "Log out",
+          style: TextStyle(fontSize: 22.0),
+        ),
+        leading: const Icon(Icons.logout, size: 30.0),
+        onTap: () {
+          // Implement log out logic
+        },
           ),
+        const Divider(color: Colors.grey),
         ],
       ),
     );
