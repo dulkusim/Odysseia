@@ -14,6 +14,7 @@ import 'package:fproject/screens/cities_screen.dart';
 import 'package:fproject/screens/friends_screen.dart';
 import 'package:fproject/screens/gallery_screen.dart';
 import 'package:fproject/screens/settings_screen.dart';
+import 'components/challenge_screen_widget.dart'; // Import the reusable widget
 
 void main() {
   runApp(OdysseiaApp());
@@ -39,7 +40,7 @@ class MainScreenState extends State<MainScreen> {
   // A list of widgets to display for each tab
   final List<Widget> _screens = [
     SingleChildScrollView(child: BasedOnPreferencesText()), // Home screen
-    Center(child: Text("Challenges Screen", style: TextStyle(fontSize: 24))), // Battles screen
+    ChallengesScreen(cityName: "Athens, Greece"), // Challenges screen
     Center(child: Text("Map Screen", style: TextStyle(fontSize: 24))), // Map screen
     ProfileScreen(), // Profile screen
   ];
@@ -594,4 +595,3 @@ class ProfileScreen extends StatelessWidget {
     );
   }
 }
-
