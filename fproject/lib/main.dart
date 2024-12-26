@@ -17,7 +17,7 @@ import 'package:fproject/screens/friends_screen.dart';
 import 'package:fproject/screens/gallery_screen.dart';
 import 'package:fproject/screens/settings_screen.dart';
 import 'components/challenge_screen_widget.dart'; // Import the reusable widget
-import 'screens/sign_in_screen.dart'; // Import Sign In Screen
+//import 'screens/sign_in_screen.dart'; // Import Sign In Screen
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized(); // Ensure Flutter is ready
@@ -28,12 +28,79 @@ void main() async {
   runApp(OdysseiaApp());
 }
 
+class SignInScreen extends StatelessWidget {
+  const SignInScreen({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text("Sign In"),
+        centerTitle: true,
+        backgroundColor: Colors.white,
+        elevation: 0,
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(20.0),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            const Text(
+              "Welcome to Odysseia!",
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 24.0,
+                color: Colors.black,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 30),
+            TextField(
+              decoration: InputDecoration(
+                labelText: "Email",
+                border: OutlineInputBorder(),
+              ),
+            ),
+            const SizedBox(height: 20),
+            TextField(
+              decoration: InputDecoration(
+                labelText: "Password",
+                border: OutlineInputBorder(),
+              ),
+              obscureText: true,
+            ),
+            const SizedBox(height: 30),
+            ElevatedButton(
+              onPressed: () {
+                // Navigate to MainScreen
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(builder: (context) => MainScreen()),
+                );
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.deepPurple,
+                padding: const EdgeInsets.symmetric(vertical: 15.0),
+              ),
+              child: const Text(
+                "Sign In",
+                style: TextStyle(fontSize: 18.0, color: Colors.white),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
 class OdysseiaApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      //debugShowCheckedModeBanner: false,
-      home: MainScreen(),//SignInScreen(), // Set Sign In Screen as the initial screen
+      debugShowCheckedModeBanner: false,
+      home: SignInScreen(), // Set SignInScreen as the initial screen
     );
   }
 }
