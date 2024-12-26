@@ -15,6 +15,7 @@ import 'package:fproject/screens/friends_screen.dart';
 import 'package:fproject/screens/gallery_screen.dart';
 import 'package:fproject/screens/settings_screen.dart';
 import 'components/challenge_screen_widget.dart'; // Import the reusable widget
+import 'screens/sign_in_screen.dart'; // Import Sign In Screen
 
 void main() {
   runApp(OdysseiaApp());
@@ -24,7 +25,8 @@ class OdysseiaApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      home: MainScreen(),
+      //debugShowCheckedModeBanner: false,
+      home: MainScreen(),//SignInScreen(), // Set Sign In Screen as the initial screen
     );
   }
 }
