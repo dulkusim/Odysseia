@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_core/firebase_core.dart'; // Import Firebase core
+import 'firebase_options.dart'; // Generated file for Firebase configuration
 import 'package:fproject/components/city_image.dart';
 import 'components/search_bar.dart'; // Import the reusable widget
 import 'components/image_card.dart'; // Import the reusable widget
@@ -16,7 +18,12 @@ import 'package:fproject/screens/gallery_screen.dart';
 import 'package:fproject/screens/settings_screen.dart';
 import 'components/challenge_screen_widget.dart'; // Import the reusable widget
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized(); // Ensure Flutter is ready
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform, // Use the generated Firebase options
+  );
+  print('Firebase Initialized Successfully!');
   runApp(OdysseiaApp());
 }
 
