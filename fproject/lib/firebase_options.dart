@@ -64,7 +64,7 @@ class DefaultFirebaseOptions {
     messagingSenderId: '1080173658538',
     projectId: 'odysseiaapp',
     storageBucket: 'odysseiaapp.firebasestorage.app',
-    iosBundleId: 'com.example.fproject',
+    iosBundleId: 'com.odysseia.app',
   );
 
   static const FirebaseOptions macos = FirebaseOptions(
@@ -73,7 +73,7 @@ class DefaultFirebaseOptions {
     messagingSenderId: '1080173658538',
     projectId: 'odysseiaapp',
     storageBucket: 'odysseiaapp.firebasestorage.app',
-    iosBundleId: 'com.example.fproject',
+    iosBundleId: 'com.odysseia.app',
   );
 
   static const FirebaseOptions windows = FirebaseOptions(

@@ -1,4 +1,4 @@
-package com.example.fproject
+package com.odysseia.app
 
 import io.flutter.embedding.android.FlutterActivity
 
