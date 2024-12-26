@@ -18,18 +18,186 @@ import 'package:fproject/screens/gallery_screen.dart';
 import 'package:fproject/screens/settings_screen.dart';
 import 'components/challenge_screen_widget.dart'; // Import the reusable widget
 //import 'screens/sign_in_screen.dart'; // Import Sign In Screen
+import 'package:firebase_auth/firebase_auth.dart';
 
 void main() async {
-  WidgetsFlutterBinding.ensureInitialized(); // Ensure Flutter is ready
+  WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform, // Use the generated Firebase options
+    options: DefaultFirebaseOptions.currentPlatform, // Use the Firebase options here
   );
-  print('Firebase Initialized Successfully!');
-  runApp(OdysseiaApp());
+  runApp(const OdysseiaApp());
 }
 
-class SignInScreen extends StatelessWidget {
+class SignUpScreen extends StatefulWidget {
+  const SignUpScreen({Key? key}) : super(key: key);
+
+  @override
+  State<SignUpScreen> createState() => SignUpScreenState();
+}
+
+class SignUpScreenState extends State<SignUpScreen> {
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+  String? _errorMessage;
+
+  Future<void> _signUp() async {
+    try {
+      // Create user with email and password
+      await _auth.createUserWithEmailAndPassword(
+        email: _emailController.text.trim(),
+        password: _passwordController.text.trim(),
+      );
+
+      // Navigate to Sign-In Screen
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => SignInScreen()),
+      );
+    } on FirebaseAuthException catch (e) {
+      setState(() {
+        if (e.code == 'weak-password') {
+          _errorMessage = 'The password provided is too weak.';
+        } else if (e.code == 'email-already-in-use') {
+          _errorMessage = 'An account already exists for this email.';
+        } else {
+          _errorMessage = 'Failed to create account. Please try again.';
+        }
+      });
+    } catch (e) {
+      setState(() {
+        _errorMessage = 'An unexpected error occurred.';
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text("Sign Up"),
+        centerTitle: true,
+        backgroundColor: Colors.white,
+        elevation: 0,
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(20.0),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            const Text(
+              "Create an Account",
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 24.0,
+                color: Colors.black,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 30),
+
+            // Email Text Field
+            TextField(
+              controller: _emailController,
+              decoration: InputDecoration(
+                labelText: "Email",
+                border: OutlineInputBorder(),
+              ),
+            ),
+            const SizedBox(height: 20),
+
+            // Password Text Field
+            TextField(
+              controller: _passwordController,
+              decoration: InputDecoration(
+                labelText: "Password",
+                border: OutlineInputBorder(),
+              ),
+              obscureText: true,
+            ),
+            const SizedBox(height: 10),
+
+            // Error Message
+            if (_errorMessage != null)
+              Text(
+                _errorMessage!,
+                style: const TextStyle(color: Colors.red),
+              ),
+            const SizedBox(height: 20),
+
+            // Sign Up Button
+            ElevatedButton(
+              onPressed: _signUp,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.deepPurple,
+                padding: const EdgeInsets.symmetric(vertical: 15.0),
+              ),
+              child: const Text(
+                "Sign Up",
+                style: TextStyle(fontSize: 18.0, color: Colors.white),
+              ),
+            ),
+
+            // Navigate to Sign In
+            TextButton(
+              onPressed: () {
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(builder: (context) => SignInScreen()),
+                );
+              },
+              child: const Text("Already have an account? Sign In"),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class SignInScreen extends StatefulWidget {
   const SignInScreen({Key? key}) : super(key: key);
+
+  @override
+  State<SignInScreen> createState() => SignInScreenState();
+}
+
+class SignInScreenState extends State<SignInScreen> {
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+  String? _errorMessage;
+
+  Future<void> _signIn() async {
+    try {
+      // Authenticate user
+      await _auth.signInWithEmailAndPassword(
+        email: _emailController.text.trim(),
+        password: _passwordController.text.trim(),
+      );
+
+      // Navigate to MainScreen on successful sign-in
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => MainScreen()),
+      );
+    } on FirebaseAuthException catch (e) {
+      setState(() {
+        if (e.code == 'user-not-found') {
+          _errorMessage = 'No user found for this email.';
+        } else if (e.code == 'wrong-password') {
+          _errorMessage = 'Incorrect password.';
+        } else {
+          _errorMessage = 'Failed to sign in. Please try again.';
+        }
+      });
+    } catch (e) {
+      setState(() {
+        _errorMessage = 'An unexpected error occurred.';
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -47,7 +215,7 @@ class SignInScreen extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             const Text(
-              "Welcome to Odysseia!",
+              "Welcome Back!",
               style: TextStyle(
                 fontWeight: FontWeight.bold,
                 fontSize: 24.0,
@@ -56,29 +224,39 @@ class SignInScreen extends StatelessWidget {
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 30),
+
+            // Email Text Field
             TextField(
+              controller: _emailController,
               decoration: InputDecoration(
                 labelText: "Email",
                 border: OutlineInputBorder(),
               ),
             ),
             const SizedBox(height: 20),
+
+            // Password Text Field
             TextField(
+              controller: _passwordController,
               decoration: InputDecoration(
                 labelText: "Password",
                 border: OutlineInputBorder(),
               ),
               obscureText: true,
             ),
-            const SizedBox(height: 30),
+            const SizedBox(height: 10),
+
+            // Error Message
+            if (_errorMessage != null)
+              Text(
+                _errorMessage!,
+                style: const TextStyle(color: Colors.red),
+              ),
+            const SizedBox(height: 20),
+
+            // Sign In Button
             ElevatedButton(
-              onPressed: () {
-                // Navigate to MainScreen
-                Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(builder: (context) => MainScreen()),
-                );
-              },
+              onPressed: _signIn,
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.deepPurple,
                 padding: const EdgeInsets.symmetric(vertical: 15.0),
@@ -88,6 +266,17 @@ class SignInScreen extends StatelessWidget {
                 style: TextStyle(fontSize: 18.0, color: Colors.white),
               ),
             ),
+
+            // Navigate to Sign Up
+            TextButton(
+              onPressed: () {
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(builder: (context) => SignUpScreen()),
+                );
+              },
+              child: const Text("Don't have an account? Sign Up"),
+            ),
           ],
         ),
       ),
@@ -96,11 +285,13 @@ class SignInScreen extends StatelessWidget {
 }
 
 class OdysseiaApp extends StatelessWidget {
+  const OdysseiaApp({Key? key}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: SignInScreen(), // Set SignInScreen as the initial screen
+      home: SignUpScreen(), // Start with Sign-Up Screen
     );
   }
 }
