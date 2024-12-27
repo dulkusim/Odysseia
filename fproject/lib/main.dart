@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart'; // Import Firebase core
 import 'firebase_options.dart'; // Generated file for Firebase configuration
-import 'package:fproject/components/city_image.dart';
+//import 'package:fproject/components/city_image.dart';
 import 'components/search_bar.dart'; // Import the reusable widget
 import 'components/image_card.dart'; // Import the reusable widget
 import 'components/challenge_card.dart'; // Import the reusable widget
@@ -19,15 +19,17 @@ import 'package:fproject/screens/settings_screen.dart';
 import 'components/challenge_screen_widget.dart'; // Import the reusable widget
 //import 'screens/sign_in_screen.dart'; // Import Sign In Screen
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
+  WidgetsFlutterBinding.ensureInitialized(); // Ensure Flutter is ready
+  // Initialize Firebase with configuration
   await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform, // Use the Firebase options here
+    options: DefaultFirebaseOptions.currentPlatform,
   );
+
   runApp(const OdysseiaApp());
 }
-
 class SignUpScreen extends StatefulWidget {
   const SignUpScreen({Key? key}) : super(key: key);
 
@@ -469,9 +471,9 @@ class BasedOnPreferencesText extends StatelessWidget {
             child: Row(
               children: [
                 CityCard(cityName: "Oslo"),
-                CityCard(cityName: "Bansko"),
-                CityCard(cityName: "Bolzano"),
-                CityCard(cityName: "Bucharest"), // Fourth city added
+                CityCard(cityName: "London"),
+                CityCard(cityName: "Lisbon"),
+                CityCard(cityName: "New York"), // Fourth city added
               ],
             ),
           ),
@@ -584,9 +586,9 @@ class WeekendTripsSection extends StatelessWidget {
             child: Row(
               children: [
                 CityCard(cityName: "Volos"),
-                CityCard(cityName: "Nafplio"),
-                CityCard(cityName: "Aegina"),
-                CityCard(cityName: "Kalamata"),
+                CityCard(cityName: "Mykonos"),
+                CityCard(cityName: "Santorini"),
+                CityCard(cityName: "Rethymno"),
               ],
             ),
           ),
@@ -624,7 +626,7 @@ class PopularDestinationsSection extends StatelessWidget {
             child: Row(
               children: [
                 CityCard(cityName: "Paris"),
-                CityCard(cityName: "Los Angeles"),
+                CityCard(cityName: "Tokyo"),
                 CityCard(cityName: "Madrid"),
                 CityCard(cityName: "Rome"),
               ],
@@ -663,8 +665,8 @@ class FriendsVisitedSection extends StatelessWidget {
             scrollDirection: Axis.horizontal,
             child: Row(
               children: [
-                CityCard(cityName: "Milan"),
-                CityCard(cityName: "Barcelona"),
+                CityCard(cityName: "Berlin"),
+                CityCard(cityName: "Budapest"),
                 CityCard(cityName: "Thessaloniki"),
                 CityCard(cityName: "Warsaw"),
               ],
@@ -776,60 +778,87 @@ class CityPageInfo extends StatelessWidget {
           child: Divider(thickness: 1.0, height: 1.0, color: Colors.black),
         ),
       ),
-      body: SingleChildScrollView(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            CityImageSection(),
-          ],
-        ),
+      body: FutureBuilder<DocumentSnapshot>(
+        future: FirebaseFirestore.instance.collection('cities').doc(cityName.toLowerCase()).get(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return Center(child: CircularProgressIndicator());
+          } else if (snapshot.hasError) {
+            return Center(child: Text("Error loading data."));
+          } else if (!snapshot.hasData || !snapshot.data!.exists) {
+            return Center(child: Text("City not found."));
+          } else {
+            final cityData = snapshot.data!.data() as Map<String, dynamic>;
+            final cityImages = List<String>.from(cityData['CityImages'] ?? []);
+            final cityDescription = cityData['CityDescription'] ?? "No description available.";
+
+            return SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  CityImageSection(cityImages: cityImages),
+                  CityPageDescription(description: cityDescription),
+                ],
+              ),
+            );
+          }
+        },
       ),
     );
   }
 }
 
 class CityImageSection extends StatelessWidget {
+  final List<String> cityImages;
+
+  const CityImageSection({required this.cityImages, Key? key}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        SizedBox(height: 15),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20.0),
-          child: SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            child: Row(
-              children: List.generate(4, (index) {
-                return Padding(
-                  padding: const EdgeInsets.only(right: 10.0),
-                  child: CityPlaceholder(),
-                );
-              }),
-            ),
-          ),
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 15.0),
+      child: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        child: Row(
+          children: cityImages.map((imageUrl) {
+            return Padding(
+              padding: const EdgeInsets.only(right: 10.0),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(10),
+                child: Image.network(
+                  imageUrl,
+                  width: 150,
+                  height: 100,
+                  fit: BoxFit.cover,
+                  errorBuilder: (context, error, stackTrace) {
+                    return Container(
+                      color: Colors.grey,
+                      width: 150,
+                      height: 100,
+                      child: Icon(Icons.error, color: Colors.red),
+                    );
+                  },
+                ),
+              ),
+            );
+          }).toList(),
         ),
-        SizedBox(height: 20),
-        CityPageDescription()
-      ],
+      ),
     );
   }
 }
 
 class CityPageDescription extends StatefulWidget {
+  final String description;
+
+  const CityPageDescription({required this.description, Key? key}) : super(key: key);
+
   @override
   CityPageDescState createState() => CityPageDescState();
 }
 
 class CityPageDescState extends State<CityPageDescription> {
   bool isExpanded = false; // Tracks if the description is expanded
-
-  final String defaultDescription =
-      "Lorem ipsum dolor sit amet, consectetur adipiscing elit. "
-      "Phasellus volutpat turpis nec tortor auctor, id bibendum est "
-      "congue. Aenean accumsan tellus eget lectus pretium, in facilisis "
-      "leo tincidunt. Ut vitae bibendum nunc. Nulla facilisi. "
-      "Suspendisse potenti. Mauris ut aliquam augue.";
 
   @override
   Widget build(BuildContext context) {
@@ -839,9 +868,7 @@ class CityPageDescState extends State<CityPageDescription> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            isExpanded
-                ? defaultDescription
-                : "${defaultDescription.substring(0, 130)}...", // Shortened description
+            isExpanded ? widget.description : "${widget.description.substring(0, 130)}...",
             style: TextStyle(fontSize: 16, color: Colors.black),
           ),
           const SizedBox(height: 8),
@@ -854,18 +881,16 @@ class CityPageDescState extends State<CityPageDescription> {
             child: Align(
               alignment: Alignment.centerRight,
               child: Text(
-              isExpanded ? "Read Less" : "Read More",
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-                color: Colors.blue,
-              ),
+                isExpanded ? "Read Less" : "Read More",
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.blue,
+                ),
               ),
             ),
           ),
-          SizedBox(height: 20),
-          DisplayChallengeCards(),
-      ],
+        ],
       ),
     );
   }

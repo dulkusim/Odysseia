@@ -1,12 +1,27 @@
-
 import 'package:flutter/material.dart';
 import 'package:fproject/main.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class CityCard extends StatelessWidget {
   final String cityName;
-  final String? imageUrl;
 
-  const CityCard({required this.cityName, this.imageUrl, Key? key}) : super(key: key);
+  const CityCard({required this.cityName, Key? key}) : super(key: key);
+
+  Future<String?> fetchCityImage(String cityName) async {
+    try {
+      final doc = await FirebaseFirestore.instance.collection('cities').doc(cityName.toLowerCase()).get();
+      if (doc.exists) {
+        final data = doc.data();
+        if (data != null && data['CityImages'] != null && data['CityImages'].isNotEmpty) {
+          return data['CityImages'][0]; // Fetch the first image URL
+        }
+      }
+      return null; // Return null if no image found
+    } catch (e) {
+      print('Error fetching image for $cityName: $e');
+      return null;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -24,16 +39,46 @@ class CityCard extends StatelessWidget {
         padding: const EdgeInsets.only(right: 10.0), // Adds spacing to the right
         child: Column(
           children: [
-            ClipRRect(
-              borderRadius: BorderRadius.circular(10.0),
-              child: Container(
-                width: 117,
-                height: 80,
-                color: Colors.grey.shade300,
-                child: imageUrl != null
-                    ? Image.network(imageUrl!, fit: BoxFit.cover)
-                    : Icon(Icons.image, size: 40, color: Colors.grey),
-              ),
+            FutureBuilder<String?>(
+              future: fetchCityImage(cityName),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return Container(
+                    width: 117,
+                    height: 80,
+                    color: Colors.grey.shade300,
+                    child: Center(child: CircularProgressIndicator()),
+                  );
+                } else if (snapshot.hasError || snapshot.data == null) {
+                  return ClipRRect(
+                    borderRadius: BorderRadius.circular(10.0),
+                    child: Container(
+                      width: 117,
+                      height: 80,
+                      color: Colors.grey.shade300,
+                      child: Icon(Icons.image, size: 40, color: Colors.grey),
+                    ),
+                  );
+                } else {
+                  return ClipRRect(
+                    borderRadius: BorderRadius.circular(10.0),
+                    child: Image.network(
+                      snapshot.data!,
+                      width: 117,
+                      height: 80,
+                      fit: BoxFit.cover,
+                      errorBuilder: (context, error, stackTrace) {
+                        return Container(
+                          color: Colors.grey.shade300,
+                          width: 117,
+                          height: 80,
+                          child: Icon(Icons.error, color: Colors.red),
+                        );
+                      },
+                    ),
+                  );
+                }
+              },
             ),
             SizedBox(height: 8),
             Text(
