@@ -41,6 +41,8 @@ class SignUpScreenState extends State<SignUpScreen> {
   final TextEditingController _passwordController = TextEditingController();
   String? _errorMessage;
 
+  bool _isPasswordHidden = true; // Boolean to toggle password visibility
+
   Future<void> _signUp() async {
     try {
       // Create user with email and password
@@ -107,14 +109,24 @@ class SignUpScreenState extends State<SignUpScreen> {
             ),
             const SizedBox(height: 20),
 
-            // Password Text Field
+            // Password Text Field with Show/Hide Icon
             TextField(
               controller: _passwordController,
               decoration: InputDecoration(
                 labelText: "Password",
                 border: OutlineInputBorder(),
+                suffixIcon: IconButton(
+                  icon: Icon(
+                    _isPasswordHidden ? Icons.visibility : Icons.visibility_off,
+                  ),
+                  onPressed: () {
+                    setState(() {
+                      _isPasswordHidden = !_isPasswordHidden;
+                    });
+                  },
+                ),
               ),
-              obscureText: true,
+              obscureText: _isPasswordHidden,
             ),
             const SizedBox(height: 10),
 
@@ -168,6 +180,8 @@ class SignInScreenState extends State<SignInScreen> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   String? _errorMessage;
+
+  bool _isPasswordHidden = true; // Boolean to toggle password visibility
 
   Future<void> _signIn() async {
     try {
@@ -235,14 +249,24 @@ class SignInScreenState extends State<SignInScreen> {
             ),
             const SizedBox(height: 20),
 
-            // Password Text Field
+            // Password Text Field with Show/Hide Icon
             TextField(
               controller: _passwordController,
               decoration: InputDecoration(
                 labelText: "Password",
                 border: OutlineInputBorder(),
+                suffixIcon: IconButton(
+                  icon: Icon(
+                    _isPasswordHidden ? Icons.visibility : Icons.visibility_off,
+                  ),
+                  onPressed: () {
+                    setState(() {
+                      _isPasswordHidden = !_isPasswordHidden;
+                    });
+                  },
+                ),
               ),
-              obscureText: true,
+              obscureText: _isPasswordHidden,
             ),
             const SizedBox(height: 10),
 
@@ -461,7 +485,6 @@ class BasedOnPreferencesText extends StatelessWidget {
   }
 }
 
-// Filter Modal Bottom Sheet
 class FilterBottomSheet extends StatefulWidget {
   @override
   FilterBottomSheetState createState() => FilterBottomSheetState();
