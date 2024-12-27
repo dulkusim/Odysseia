@@ -20,6 +20,7 @@ import 'components/challenge_screen_widget.dart'; // Import the reusable widget
 //import 'screens/sign_in_screen.dart'; // Import Sign In Screen
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:fproject/screens/map_screen.dart'; 
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized(); // Ensure Flutter is ready
@@ -334,15 +335,14 @@ class MainScreenState extends State<MainScreen> {
   final List<Widget> _screens = [
     SingleChildScrollView(child: BasedOnPreferencesText()), // Home screen
     ChallengesScreen(cityName: "Athens, Greece"), // Challenges screen
-    Center(child: Text("Map Screen", style: TextStyle(fontSize: 24))), // Map screen
+    MapScreen(),// Map screen
     ProfileScreen(), // Profile screen
   ];
 
-  @override
+    @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: _selectedIndex == 0 ? OdysseiaAppBar() : null, // Show app bar only on the first screen
-      body: _screens[_selectedIndex], // Display the selected screen
+      body: _screens[_selectedIndex], // Display the screen based on the selected index
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _selectedIndex,
         onTap: (index) {
@@ -354,13 +354,13 @@ class MainScreenState extends State<MainScreen> {
           BottomNavigationBarItem(
             icon: Icon(Icons.home, size: 30),
             label: 'Home',
-            ),
+          ),
           BottomNavigationBarItem(
             icon: Icon(HugeIcons.strokeRoundedSword03, size: 30), // Placeholder for battles icon
             label: 'Challenges',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.map, size: 25),
+            icon: Icon(Icons.map, size: 25), // Map icon
             label: 'Map',
           ),
           BottomNavigationBarItem(
