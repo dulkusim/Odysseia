@@ -673,45 +673,6 @@ class FriendsVisitedSection extends StatelessWidget {
             ),
           ),
         ),
-        SizedBox(height: 30),
-        DokimastikoSection()
-      ],
-    );
-  }
-}
-
-class DokimastikoSection extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20.0),
-          child: Text(
-            'Dokimi:',
-            style: TextStyle(
-              fontWeight: FontWeight.bold,
-              fontSize: 22.0,
-            ),
-          ),
-        ),
-        SizedBox(height: 9),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20.0),
-          child: SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            child: Row(
-              children: [
-                CityCard(cityName: "Dokimi1"),
-                CityCard(cityName: "Dokimi2"),
-                CityCard(cityName: "Dokimi3"),
-                CityCard(cityName: "Dokimi4"),
-              ],
-            ),
-          ),
-        ),
-        SizedBox(height: 20),
       ],
     );
   }
