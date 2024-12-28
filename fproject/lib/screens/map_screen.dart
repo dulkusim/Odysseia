@@ -4,10 +4,10 @@ import 'package:latlong2/latlong.dart';
 
 class MapScreen extends StatefulWidget {
   @override
-  _MapScreenState createState() => _MapScreenState();
+  MapScreenState createState() => MapScreenState();
 }
 
-class _MapScreenState extends State<MapScreen> {
+class MapScreenState extends State<MapScreen> {
   final TextEditingController _searchController = TextEditingController();
   LatLng _center = LatLng(40.7128, -74.0060); // Default: New York City
   List<Marker> _markers = []; // List of markers for the map
@@ -98,30 +98,6 @@ class _MapScreenState extends State<MapScreen> {
                 onSubmitted: _onSearch,
               ),
             ),
-          ),
-        ],
-      ),
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: 2, // Map screen index
-        onTap: (index) {
-          // Handle navigation if needed
-        },
-        items: [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home),
-            label: 'Home',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.list),
-            label: 'Challenges',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.map),
-            label: 'Map',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.person),
-            label: 'Profile',
           ),
         ],
       ),

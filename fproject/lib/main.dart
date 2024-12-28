@@ -329,46 +329,51 @@ class MainScreen extends StatefulWidget {
 }
 
 class MainScreenState extends State<MainScreen> {
-  int _selectedIndex = 0; // To track the selected navigation item
+  int _selectedIndex = 0; // Tracks the selected navigation item
 
-  // A list of widgets to display for each tab
+  // Screens corresponding to each tab
   final List<Widget> _screens = [
-    HomeScreen(), // Updated Home screen
+    HomeScreen(), // Home screen
     ChallengesScreen(cityName: "Athens, Greece"), // Challenges screen
-    MapScreen(),// Map screen
+    MapScreen(), // Map screen
     ProfileScreen(), // Profile screen
   ];
 
-    @override
+  // Bottom Navigation Items
+  final List<BottomNavigationBarItem> _navItems = [
+    BottomNavigationBarItem(
+      icon: Icon(Icons.home, size: 30),
+      label: 'Home',
+    ),
+    BottomNavigationBarItem(
+      icon: Icon(HugeIcons.strokeRoundedSword03, size: 30), // Challenges icon
+      label: 'Challenges',
+    ),
+    BottomNavigationBarItem(
+      icon: Icon(Icons.map, size: 25), // Map icon
+      label: 'Map',
+    ),
+    BottomNavigationBarItem(
+      icon: Icon(Icons.person, size: 30),
+      label: 'Profile',
+    ),
+  ];
+
+  // Handle tab selection
+  void _onItemTapped(int index) {
+    setState(() {
+      _selectedIndex = index;
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: _screens[_selectedIndex], // Display the selected screen
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _selectedIndex,
-        onTap: (index) {
-          setState(() {
-            _selectedIndex = index;
-          });
-        },
-        items: [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home, size: 30),
-            label: 'Home',
-          ),
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(HugeIcons.strokeRoundedSword03, size: 30), // Placeholder for battles icon
-            label: 'Challenges',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.map, size: 25), // Map icon
-            label: 'Map',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.person, size: 30),
-            label: 'Profile',
-          ),
-        ],
+        onTap: _onItemTapped,
+        items: _navItems,
         selectedItemColor: Colors.black, // Active icon color
         unselectedItemColor: Colors.grey, // Inactive icon color
         showUnselectedLabels: true,
