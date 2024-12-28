@@ -526,13 +526,73 @@ class HomeScreenState extends State<HomeScreen> {
   }
 }
 
-class BasedOnPreferencesText extends StatelessWidget {
+class BasedOnPreferencesText extends StatefulWidget {
+  @override
+  BasedOnPreferencesTextState createState() => BasedOnPreferencesTextState();
+}
+
+class BasedOnPreferencesTextState extends State<BasedOnPreferencesText> {
+  List<String> _selectedPreferences = [];
+  List<String> _filteredCities = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchCities(); // Fetch all cities initially
+  }
+
+  Future<void> _fetchCities() async {
+    try {
+      final snapshot = await FirebaseFirestore.instance.collection('cities').get();
+      final cityNames = snapshot.docs.map((doc) => doc['CityName'] as String).toList();
+
+      setState(() {
+        _filteredCities = cityNames;
+      });
+    } catch (e) {
+      print("Error fetching cities: $e");
+    }
+  }
+
+  Future<void> _filterCitiesByPreferences(List<String> preferences) async {
+    try {
+      final snapshot = await FirebaseFirestore.instance.collection('cities').get();
+      final cities = snapshot.docs.where((doc) {
+        final cityPreferences = doc['Preferences'] as List<dynamic>;
+        return preferences.every((preference) => cityPreferences.contains(preference));
+      }).map((doc) => doc['CityName'] as String).toList();
+
+      setState(() {
+        _filteredCities = cities;
+        _selectedPreferences = preferences;
+      });
+    } catch (e) {
+      print("Error filtering cities: $e");
+    }
+  }
+
+  void _openFilterModal() {
+    showModalBottomSheet(
+      context: context,
+      builder: (context) {
+        return FilterBottomSheet(
+          selectedFilters: _selectedPreferences,
+          onFiltersApplied: (selectedFilters) {
+            Navigator.pop(context); // Close the modal
+            _filterCitiesByPreferences(selectedFilters); // Filter cities
+          },
+        );
+      },
+      backgroundColor: Colors.transparent,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        SizedBox(height: 15), // Add some spacing at the top
+        SizedBox(height: 15),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 20.0),
           child: Row(
@@ -548,16 +608,7 @@ class BasedOnPreferencesText extends StatelessWidget {
               IconButton(
                 icon: Icon(Icons.filter_alt),
                 iconSize: 30.0,
-                onPressed: () {
-                  // Show the filter modal
-                  showModalBottomSheet(
-                    context: context,
-                    builder: (context) {
-                      return FilterBottomSheet();
-                    },
-                    backgroundColor: Colors.transparent,
-                  );
-                },
+                onPressed: _openFilterModal,
               ),
             ],
           ),
@@ -567,18 +618,13 @@ class BasedOnPreferencesText extends StatelessWidget {
           child: SingleChildScrollView(
             scrollDirection: Axis.horizontal,
             child: Row(
-              children: [
-                CityCard(cityName: "Oslo"),
-                CityCard(cityName: "London"),
-                CityCard(cityName: "Lisbon"),
-                CityCard(cityName: "New York"), // Fourth city added
-              ],
+              children: _filteredCities.map((cityName) {
+                return CityCard(cityName: cityName);
+              }).toList(),
             ),
           ),
         ),
-        SizedBox(height: 30), // Add some spacing between sections
-
-        // "Weekend trips" section
+        SizedBox(height: 30),
         WeekendTripsSection(),
       ],
     );
@@ -586,6 +632,15 @@ class BasedOnPreferencesText extends StatelessWidget {
 }
 
 class FilterBottomSheet extends StatefulWidget {
+  final List<String> selectedFilters;
+  final Function(List<String>) onFiltersApplied;
+
+  const FilterBottomSheet({
+    required this.selectedFilters,
+    required this.onFiltersApplied,
+    Key? key,
+  }) : super(key: key);
+
   @override
   FilterBottomSheetState createState() => FilterBottomSheetState();
 }
@@ -599,6 +654,16 @@ class FilterBottomSheetState extends State<FilterBottomSheet> {
     'Beach': false,
     'Nightlife': false,
   };
+
+  @override
+  void initState() {
+    super.initState();
+    widget.selectedFilters.forEach((filter) {
+      if (_filters.containsKey(filter)) {
+        _filters[filter] = true;
+      }
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -639,8 +704,11 @@ class FilterBottomSheetState extends State<FilterBottomSheet> {
           SizedBox(height: 10),
           ElevatedButton(
             onPressed: () {
-              Navigator.pop(context); // Close the modal
-              print('Selected Filters: ${_filters.entries.where((e) => e.value).map((e) => e.key).toList()}');
+              final selectedFilters = _filters.entries
+                  .where((entry) => entry.value)
+                  .map((entry) => entry.key)
+                  .toList();
+              widget.onFiltersApplied(selectedFilters);
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.deepPurple,
@@ -650,8 +718,8 @@ class FilterBottomSheetState extends State<FilterBottomSheet> {
             ),
             child: Center(
               child: Text(
-              'Apply Filters',
-              style: TextStyle(color: Colors.white, fontSize: 18),
+                'Apply Filters',
+                style: TextStyle(color: Colors.white, fontSize: 18),
               ),
             ),
           ),
