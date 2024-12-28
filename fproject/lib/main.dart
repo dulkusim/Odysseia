@@ -1,3 +1,5 @@
+// ignore_for_file: deprecated_member_use, use_build_context_synchronously
+
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart'; // Import Firebase core
 import 'firebase_options.dart'; // Generated file for Firebase configuration
@@ -21,6 +23,7 @@ import 'components/challenge_screen_widget.dart'; // Import the reusable widget
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:fproject/screens/map_screen.dart'; 
+import 'package:geolocator/geolocator.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized(); // Ensure Flutter is ready
@@ -506,7 +509,7 @@ class HomeScreenState extends State<HomeScreen> {
                           context,
                           MaterialPageRoute(
                             builder: (context) => CityPageInfo(
-                              cityName: _filteredSuggestions[index+1],
+                              cityName: _filteredSuggestions[index],
                             ),
                           ),
                         );
@@ -658,11 +661,11 @@ class FilterBottomSheetState extends State<FilterBottomSheet> {
   @override
   void initState() {
     super.initState();
-    widget.selectedFilters.forEach((filter) {
+    for (var filter in widget.selectedFilters) {
       if (_filters.containsKey(filter)) {
         _filters[filter] = true;
       }
-    });
+    }
   }
 
   @override
@@ -729,7 +732,86 @@ class FilterBottomSheetState extends State<FilterBottomSheet> {
   }
 }
 
-class WeekendTripsSection extends StatelessWidget {
+class WeekendTripsSection extends StatefulWidget {
+  @override
+  WeekendTripsSectionState createState() => WeekendTripsSectionState();
+}
+
+class WeekendTripsSectionState extends State<WeekendTripsSection> {
+  List<Map<String, dynamic>> _closestCities = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _getClosestCities();
+  }
+
+  Future<void> _getClosestCities() async {
+    try {
+      print("Requesting location...");
+      // Request location permission
+      LocationPermission permission = await Geolocator.checkPermission();
+      if (permission == LocationPermission.denied ||
+          permission == LocationPermission.deniedForever) {
+        print("Location permission denied, requesting permission...");
+        permission = await Geolocator.requestPermission();
+      }
+
+      if (permission == LocationPermission.whileInUse || permission == LocationPermission.always) {
+        print("Location permission granted.");
+        // Get user's current location
+        Position position = await Geolocator.getCurrentPosition(
+          desiredAccuracy: LocationAccuracy.high,
+        );
+
+        double userLat = position.latitude;
+        double userLon = position.longitude;
+
+        print("User's location: Latitude = $userLat, Longitude = $userLon");
+
+        // Fetch city data from Firestore
+        print("Fetching city data from Firestore...");
+        final snapshot = await FirebaseFirestore.instance.collection('cities').get();
+
+        print("Firestore data fetched. Processing cities...");
+        List<Map<String, dynamic>> cities = snapshot.docs.map((doc) {
+          final data = doc.data();
+          return {
+            'CityName': data['CityName'],
+            'Latitude': data['Location'].latitude,
+            'Longitude': data['Location'].longitude,
+          };
+        }).toList();
+
+        print("Cities retrieved from Firestore: ${cities.map((city) => city['CityName']).toList()}");
+
+        // Calculate Euclidean distance and sort by proximity
+        cities.sort((a, b) {
+          double distanceA = _calculateDistance(userLat, userLon, a['Latitude'], a['Longitude']);
+          double distanceB = _calculateDistance(userLat, userLon, b['Latitude'], b['Longitude']);
+          return distanceA.compareTo(distanceB);
+        });
+
+        // Take the 4 closest cities
+        setState(() {
+          _closestCities = cities.take(5).toList();
+        });
+
+        print("Closest cities: ${_closestCities.map((city) => city['CityName']).toList()}");
+      } else {
+        print("Location permission not granted.");
+      }
+    } catch (e) {
+      print("Error fetching closest cities: $e");
+    }
+  }
+
+  double _calculateDistance(double lat1, double lon1, double lat2, double lon2) {
+    double distance = (lat1 - lat2) * (lat1 - lat2) + (lon1 - lon2) * (lon1 - lon2);
+    print("Calculated distance: $distance");
+    return distance;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -751,12 +833,9 @@ class WeekendTripsSection extends StatelessWidget {
           child: SingleChildScrollView(
             scrollDirection: Axis.horizontal,
             child: Row(
-              children: [
-                CityCard(cityName: "Volos"),
-                CityCard(cityName: "Mykonos"),
-                CityCard(cityName: "Santorini"),
-                CityCard(cityName: "Rethymno"),
-              ],
+              children: _closestCities.map((city) {
+                return CityCard(cityName: city['CityName']);
+              }).toList(),
             ),
           ),
         ),
