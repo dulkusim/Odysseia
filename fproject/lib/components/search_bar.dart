@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 class mySearchBar extends StatefulWidget {
-  final Function(String)? onSearch; // Callback for when the user submits input
+  final Function(String)? onSearch; // Callback for when the user types input
   final Function? onClose; // Callback for when the search bar is closed
 
   const mySearchBar({this.onSearch, this.onClose, Key? key}) : super(key: key);
@@ -35,9 +35,9 @@ class mySearchBarState extends State<mySearchBar> {
                 hintStyle: TextStyle(color: Colors.grey),
                 border: InputBorder.none,
               ),
-              onSubmitted: (value) {
+              onChanged: (value) {
                 if (widget.onSearch != null) {
-                  widget.onSearch!(value); // Trigger the callback
+                  widget.onSearch!(value); // Trigger the callback on every change
                 }
               },
             ),

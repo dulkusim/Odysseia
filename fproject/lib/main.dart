@@ -332,7 +332,7 @@ class MainScreenState extends State<MainScreen> {
 
   // A list of widgets to display for each tab
   final List<Widget> _screens = [
-    SingleChildScrollView(child: BasedOnPreferencesText()), // Home screen
+    HomeScreen(), // Updated Home screen
     ChallengesScreen(cityName: "Athens, Greece"), // Challenges screen
     Center(child: Text("Map Screen", style: TextStyle(fontSize: 24))), // Map screen
     ProfileScreen(), // Profile screen
@@ -341,7 +341,6 @@ class MainScreenState extends State<MainScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: _selectedIndex == 0 ? OdysseiaAppBar() : null, // Show app bar only on the first screen
       body: _screens[_selectedIndex], // Display the selected screen
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _selectedIndex,
@@ -354,7 +353,7 @@ class MainScreenState extends State<MainScreen> {
           BottomNavigationBarItem(
             icon: Icon(Icons.home, size: 30),
             label: 'Home',
-            ),
+          ),
           BottomNavigationBarItem(
             icon: Icon(HugeIcons.strokeRoundedSword03, size: 30), // Placeholder for battles icon
             label: 'Challenges',
@@ -377,53 +376,145 @@ class MainScreenState extends State<MainScreen> {
   }
 }
 
-class OdysseiaAppBar extends StatefulWidget implements PreferredSizeWidget {
+class HomeScreen extends StatefulWidget {
   @override
-  OdysseiaAppBarState createState() => OdysseiaAppBarState();
-
-  @override
-  Size get preferredSize => Size.fromHeight(kToolbarHeight + 4.0);
+  HomeScreenState createState() => HomeScreenState();
 }
 
-class OdysseiaAppBarState extends State<OdysseiaAppBar> {
-  bool _isSearching = false;
+class HomeScreenState extends State<HomeScreen> {
+  bool _isSearching = false; // To track if the search bar is active
+  String _searchQuery = ''; // To store the current search query
+  List<String> _searchSuggestions = []; // Will hold city names from Firestore
+  bool _isLoadingCities = true; // To track loading state
+
+  @override
+  void initState() {
+    super.initState();
+    fetchCities(); // Fetch cities when the widget initializes
+  }
+
+  Future<void> fetchCities() async {
+    try {
+      final snapshot =
+          await FirebaseFirestore.instance.collection('cities').get();
+      setState(() {
+        _searchSuggestions = snapshot.docs
+            .map((doc) => doc['CityName'] as String)
+            .toList(); // Extract city names
+        _isLoadingCities = false; // Stop loading
+      });
+    } catch (e) {
+      print('Error fetching cities: $e');
+      setState(() {
+        _isLoadingCities = false; // Stop loading even if there’s an error
+      });
+    }
+  }
+
+  List<String> get _filteredSuggestions => _searchSuggestions
+      .where((item) =>
+          item.toLowerCase().startsWith(_searchQuery.toLowerCase()))
+      .toList();
 
   @override
   Widget build(BuildContext context) {
-    return AppBar(
-      title: _isSearching
-          ? mySearchBar(
-              onSearch: (value) {
-                print('Search input: $value'); // Handle search logic here
-              },
-              onClose: () {
-                setState(() {
-                  _isSearching = false;
-                });
-              },
-            )
-          : Text(
-            'Odysseia',
-            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 30.0),
+    return Stack(
+      children: [
+        SafeArea(
+          child: SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Odysseia title and search bar
+                Padding(
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 20.0, vertical: 10.0),
+                  child: _isSearching
+                      ? mySearchBar(
+                          onSearch: (value) {
+                            setState(() {
+                              _searchQuery = value; // Update search query dynamically
+                            });
+                          },
+                          onClose: () {
+                            setState(() {
+                              _isSearching = false;
+                              _searchQuery = '';
+                            });
+                          },
+                        )
+                      : Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              'Odysseia',
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 30.0,
+                              ),
+                            ),
+                            IconButton(
+                              icon: Icon(Icons.search, size: 30),
+                              onPressed: () {
+                                setState(() {
+                                  _isSearching = true;
+                                });
+                              },
+                            ),
+                          ],
+                        ),
+                ),
+                Divider(
+                  color: Colors.black,
+                  thickness: 2,
+                  height: 10,
+                ),
+                // "Based on your preferences" and its content
+                _isLoadingCities
+                    ? Center(child: CircularProgressIndicator())
+                    : BasedOnPreferencesText(),
+              ],
+            ),
           ),
-      actions: [
-        if (!_isSearching)
-          IconButton(
-            icon: Icon(Icons.search),
-            onPressed: () {
-              setState(() {
-                _isSearching = true;
-              });
-            },
+        ),
+        // Search Suggestions Overlay
+        if (_isSearching && _searchQuery.isNotEmpty)
+          Positioned(
+            top: 80, // Adjust this based on your layout
+            left: 0,
+            right: 0,
+            child: Material(
+              elevation: 4.0,
+              child: Container(
+                color: Colors.white,
+                child: ListView.builder(
+                  shrinkWrap: true,
+                  itemCount: _filteredSuggestions.length,
+                  itemBuilder: (context, index) {
+                    return ListTile(
+                      title: Text(_filteredSuggestions[index]),
+                      onTap: () {
+                        // Handle suggestion selection
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => CityPageInfo(
+                              cityName: _filteredSuggestions[index+1],
+                            ),
+                          ),
+                        );
+                        setState(() {
+                          _isSearching = false;
+                          _searchQuery = '';
+                        });
+                      },
+                    );
+                  },
+                ),
+              ),
+            ),
           ),
       ],
-      bottom: PreferredSize(
-        preferredSize: Size.fromHeight(4.0),
-        child: Container(
-          color: Colors.black,
-          height: 3.0,
-        ),
-      ),
     );
   }
 }
@@ -495,10 +586,11 @@ class FilterBottomSheet extends StatefulWidget {
 class FilterBottomSheetState extends State<FilterBottomSheet> {
   final Map<String, bool> _filters = {
     'Wine': false,
-    'Sights': false,
+    'Sightseeing': false,
     'Rest': false,
-    'Hiking': false,
+    'Nature': false,
     'Beach': false,
+    'Nightlife': false,
   };
 
   @override
