@@ -34,146 +34,6 @@ void main() async {
 
   runApp(const OdysseiaApp());
 }
-class SignUpScreen extends StatefulWidget {
-  const SignUpScreen({Key? key}) : super(key: key);
-
-  @override
-  State<SignUpScreen> createState() => SignUpScreenState();
-}
-
-class SignUpScreenState extends State<SignUpScreen> {
-  final FirebaseAuth _auth = FirebaseAuth.instance;
-  final TextEditingController _emailController = TextEditingController();
-  final TextEditingController _passwordController = TextEditingController();
-  String? _errorMessage;
-
-  bool _isPasswordHidden = true; // Boolean to toggle password visibility
-
-  Future<void> _signUp() async {
-    try {
-      // Create user with email and password
-      await _auth.createUserWithEmailAndPassword(
-        email: _emailController.text.trim(),
-        password: _passwordController.text.trim(),
-      );
-
-      // Navigate to Sign-In Screen
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => SignInScreen()),
-      );
-    } on FirebaseAuthException catch (e) {
-      setState(() {
-        if (e.code == 'weak-password') {
-          _errorMessage = 'The password provided is too weak.';
-        } else if (e.code == 'email-already-in-use') {
-          _errorMessage = 'An account already exists for this email.';
-        } else {
-          _errorMessage = 'Failed to create account. Please try again.';
-        }
-      });
-    } catch (e) {
-      setState(() {
-        _errorMessage = 'An unexpected error occurred.';
-      });
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text("Sign Up"),
-        centerTitle: true,
-        backgroundColor: Colors.white,
-        elevation: 0,
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(20.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            const Text(
-              "Create an Account",
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 24.0,
-                color: Colors.black,
-              ),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 30),
-
-            // Email Text Field
-            TextField(
-              controller: _emailController,
-              decoration: InputDecoration(
-                labelText: "Email",
-                border: OutlineInputBorder(),
-              ),
-            ),
-            const SizedBox(height: 20),
-
-            // Password Text Field with Show/Hide Icon
-            TextField(
-              controller: _passwordController,
-              decoration: InputDecoration(
-                labelText: "Password",
-                border: OutlineInputBorder(),
-                suffixIcon: IconButton(
-                  icon: Icon(
-                    _isPasswordHidden ? Icons.visibility : Icons.visibility_off,
-                  ),
-                  onPressed: () {
-                    setState(() {
-                      _isPasswordHidden = !_isPasswordHidden;
-                    });
-                  },
-                ),
-              ),
-              obscureText: _isPasswordHidden,
-            ),
-            const SizedBox(height: 10),
-
-            // Error Message
-            if (_errorMessage != null)
-              Text(
-                _errorMessage!,
-                style: const TextStyle(color: Colors.red),
-              ),
-            const SizedBox(height: 20),
-
-            // Sign Up Button
-            ElevatedButton(
-              onPressed: _signUp,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.deepPurple,
-                padding: const EdgeInsets.symmetric(vertical: 15.0),
-              ),
-              child: const Text(
-                "Sign Up",
-                style: TextStyle(fontSize: 18.0, color: Colors.white),
-              ),
-            ),
-
-            // Navigate to Sign In
-            TextButton(
-              onPressed: () {
-                Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(builder: (context) => SignInScreen()),
-                );
-              },
-              child: const Text("Already have an account? Sign In"),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
 class SignInScreen extends StatefulWidget {
   const SignInScreen({Key? key}) : super(key: key);
 
@@ -314,6 +174,146 @@ class SignInScreenState extends State<SignInScreen> {
   }
 }
 
+class SignUpScreen extends StatefulWidget {
+  const SignUpScreen({Key? key}) : super(key: key);
+
+  @override
+  State<SignUpScreen> createState() => SignUpScreenState();
+}
+
+class SignUpScreenState extends State<SignUpScreen> {
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+  String? _errorMessage;
+
+  bool _isPasswordHidden = true; // Boolean to toggle password visibility
+
+  Future<void> _signUp() async {
+    try {
+      // Create user with email and password
+      await _auth.createUserWithEmailAndPassword(
+        email: _emailController.text.trim(),
+        password: _passwordController.text.trim(),
+      );
+
+      // Navigate to Sign-In Screen
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => SignInScreen()),
+      );
+    } on FirebaseAuthException catch (e) {
+      setState(() {
+        if (e.code == 'weak-password') {
+          _errorMessage = 'The password provided is too weak.';
+        } else if (e.code == 'email-already-in-use') {
+          _errorMessage = 'An account already exists for this email.';
+        } else {
+          _errorMessage = 'Failed to create account. Please try again.';
+        }
+      });
+    } catch (e) {
+      setState(() {
+        _errorMessage = 'An unexpected error occurred.';
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text("Sign Up"),
+        centerTitle: true,
+        backgroundColor: Colors.white,
+        elevation: 0,
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(20.0),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            const Text(
+              "Create an Account",
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 24.0,
+                color: Colors.black,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 30),
+
+            // Email Text Field
+            TextField(
+              controller: _emailController,
+              decoration: InputDecoration(
+                labelText: "Email",
+                border: OutlineInputBorder(),
+              ),
+            ),
+            const SizedBox(height: 20),
+
+            // Password Text Field with Show/Hide Icon
+            TextField(
+              controller: _passwordController,
+              decoration: InputDecoration(
+                labelText: "Password",
+                border: OutlineInputBorder(),
+                suffixIcon: IconButton(
+                  icon: Icon(
+                    _isPasswordHidden ? Icons.visibility : Icons.visibility_off,
+                  ),
+                  onPressed: () {
+                    setState(() {
+                      _isPasswordHidden = !_isPasswordHidden;
+                    });
+                  },
+                ),
+              ),
+              obscureText: _isPasswordHidden,
+            ),
+            const SizedBox(height: 10),
+
+            // Error Message
+            if (_errorMessage != null)
+              Text(
+                _errorMessage!,
+                style: const TextStyle(color: Colors.red),
+              ),
+            const SizedBox(height: 20),
+
+            // Sign Up Button
+            ElevatedButton(
+              onPressed: _signUp,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.deepPurple,
+                padding: const EdgeInsets.symmetric(vertical: 15.0),
+              ),
+              child: const Text(
+                "Sign Up",
+                style: TextStyle(fontSize: 18.0, color: Colors.white),
+              ),
+            ),
+
+            // Navigate to Sign In
+            TextButton(
+              onPressed: () {
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(builder: (context) => SignInScreen()),
+                );
+              },
+              child: const Text("Already have an account? Sign In"),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
 class OdysseiaApp extends StatelessWidget {
   const OdysseiaApp({Key? key}) : super(key: key);
 
@@ -426,6 +426,14 @@ class HomeScreenState extends State<HomeScreen> {
           item.toLowerCase().startsWith(_searchQuery.toLowerCase()))
       .toList();
 
+  List<int> get _filteredSuggestionIndices => _searchSuggestions
+      .asMap()
+      .entries
+      .where((entry) =>
+          entry.value.toLowerCase().startsWith(_searchQuery.toLowerCase()))
+      .map((entry) => entry.key)
+      .toList();
+
   @override
   Widget build(BuildContext context) {
     return Stack(
@@ -504,15 +512,20 @@ class HomeScreenState extends State<HomeScreen> {
                     return ListTile(
                       title: Text(_filteredSuggestions[index]),
                       onTap: () {
-                        // Handle suggestion selection
+                        // Fetch the correct index from the original database
+                        final originalIndex = _filteredSuggestionIndices[index];
+                        final selectedCityName =
+                            _searchSuggestions[originalIndex];
+
                         Navigator.push(
                           context,
                           MaterialPageRoute(
                             builder: (context) => CityPageInfo(
-                              cityName: _filteredSuggestions[index],
+                              cityName: selectedCityName, // Pass the correct city name
                             ),
                           ),
                         );
+
                         setState(() {
                           _isSearching = false;
                           _searchQuery = '';
