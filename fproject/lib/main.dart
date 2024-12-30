@@ -1,5 +1,4 @@
 // ignore_for_file: deprecated_member_use, use_build_context_synchronously
-
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart'; // Import Firebase core
 import 'firebase_options.dart'; // Generated file for Firebase configuration
@@ -32,135 +31,41 @@ void main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
-  final PopulateChallengesManual populateChallengesManual = PopulateChallengesManual();
-
-  // Challenges for Athens
-List<Map<String, dynamic>> zakynthosChallenges = [
-  {
-    'name': 'Visit Navagio Beach (Shipwreck Cove)',
-    'category': 'Beach',
-    'gps_verifiable': true,
-    'location': GeoPoint(37.8593, 20.6246),
-  },
-  {
-    'name': 'Explore the Blue Caves',
-    'category': 'Nature',
-    'gps_verifiable': true,
-    'location': GeoPoint(37.9251, 20.7012),
-  },
-  {
-    'name': 'Swim at Porto Limnionas Beach',
-    'category': 'Beach',
-    'gps_verifiable': true,
-    'location': GeoPoint(37.7672, 20.6921),
-  },
-  {
-    'name': 'Admire the view from Bohali Castle',
-    'category': 'Sights',
-    'gps_verifiable': true,
-    'location': GeoPoint(37.7911, 20.9008),
-  },
-  {
-    'name': 'Visit the Byzantine Museum of Zakynthos',
-    'category': 'Museums',
-    'gps_verifiable': true,
-    'location': GeoPoint(37.7819, 20.8957),
-  },
-  {
-    'name': 'Taste the traditional Zakynthian Ladotyri cheese',
-    'category': 'Food',
-    'gps_verifiable': false,
-    'location': null,
-  },
-  {
-    'name': 'Walk along Zakynthos Town Harbor',
-    'category': 'Sights',
-    'gps_verifiable': true,
-    'location': GeoPoint(37.7823, 20.8994),
-  },
-  {
-    'name': 'Take a boat tour to Marathonisi Island (Turtle Island)',
-    'category': 'Nature',
-    'gps_verifiable': true,
-    'location': GeoPoint(37.7194, 20.8948),
-  },
-  {
-    'name': 'Relax at Gerakas Beach',
-    'category': 'Beach',
-    'gps_verifiable': true,
-    'location': GeoPoint(37.7001, 20.9986),
-  },
-  {
-    'name': 'Visit the Church of Agios Dionysios',
-    'category': 'Sights',
-    'gps_verifiable': true,
-    'location': GeoPoint(37.7825, 20.9002),
-  },
-  {
-    'name': 'Enjoy a Zakynthian wine tasting experience',
-    'category': 'Food',
-    'gps_verifiable': false,
-    'location': null,
-  },
-  {
-    'name': 'Explore the Venetian Watchtower at Keri',
-    'category': 'Sights',
-    'gps_verifiable': true,
-    'location': GeoPoint(37.6772, 20.8258),
-  },
-  {
-    'name': 'Take a photo at Mizithres Rocks',
-    'category': 'Sights',
-    'gps_verifiable': true,
-    'location': GeoPoint(37.6603, 20.8207),
-  },
-  {
-    'name': 'Walk through Solomos Square',
-    'category': 'Sights',
-    'gps_verifiable': true,
-    'location': GeoPoint(37.7814, 20.8952),
-  },
-  {
-    'name': 'Discover Askos Stone Park',
-    'category': 'Nature',
-    'gps_verifiable': true,
-    'location': GeoPoint(37.8728, 20.7074),
-  },
-  {
-    'name': 'Try local Mandolato (Nougat)',
-    'category': 'Food',
-    'gps_verifiable': false,
-    'location': null,
-  },
-  {
-    'name': 'Dive at Laganas Beach',
-    'category': 'Beach',
-    'gps_verifiable': true,
-    'location': GeoPoint(37.7286, 20.8721),
-  },
-  {
-    'name': 'Explore the Monastery of Anafonitria',
-    'category': 'Sights',
-    'gps_verifiable': true,
-    'location': GeoPoint(37.8673, 20.6371),
-  },
-  {
-    'name': 'Visit the Water Village Zante',
-    'category': 'Parks/Gardens',
-    'gps_verifiable': true,
-    'location': GeoPoint(37.7983, 20.8221),
-  },
-  {
-    'name': 'Watch the sunset at Keri Lighthouse',
-    'category': 'Sights',
-    'gps_verifiable': true,
-    'location': GeoPoint(37.6784, 20.8302),
-  },
-];
-
-  // Add challenges for Athens
-  await populateChallengesManual.addChallengesForCity("Zakynthos", zakynthosChallenges);
   runApp(const OdysseiaApp());
+}
+
+Future<void> addImagesToChallenges(String cityName, List<String> imageUrls) async {
+  try {
+    // Reference the challenges collection for the specific city
+    CollectionReference challengesCollection = FirebaseFirestore.instance
+        .collection('cities')
+        .doc(cityName.toLowerCase()) // Assuming city names are stored in lowercase
+        .collection('challenges');
+
+    // Fetch all challenge documents
+    QuerySnapshot snapshot = await challengesCollection.get();
+
+    if (snapshot.docs.length != imageUrls.length) {
+      print("Number of images provided doesn't match the number of challenges!");
+      return;
+    }
+
+    // Loop through each document and add the image attribute
+    for (int i = 0; i < snapshot.docs.length; i++) {
+      String challengeId = snapshot.docs[i].id;
+      String imageUrl = imageUrls[i];
+
+      // Update the document with the image URL
+      await challengesCollection.doc(challengeId).update({
+        'image': imageUrl,
+      });
+      print("Added image for challenge $challengeId: $imageUrl");
+    }
+
+    print("Images added successfully for all challenges in $cityName.");
+  } catch (e) {
+    print("Error adding images to challenges: $e");
+  }
 }
 
 class SignInScreen extends StatefulWidget {
@@ -1339,77 +1244,5 @@ class ProfileScreen extends StatelessWidget {
         ),
       ),
     );
-  }
-}
-
-/*class PopulateChallengesManual {
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-
-  Future<void> addChallengesForCity(String cityName) async {
-    try {
-      // Predefined challenges for Athens
-      List<Map<String, dynamic>> challenges = [
-        {'name': 'Visit the Acropolis', 'category': 'Sights'},
-        {'name': 'Explore the Parthenon', 'category': 'Sights'},
-        {'name': 'Walk through Plaka', 'category': 'Sights'},
-        {'name': 'Visit the National Archaeological Museum', 'category': 'Museums'},
-        {'name': 'See the Changing of the Guard at Syntagma Square', 'category': 'Statues'},
-        {'name': 'Try traditional Souvlaki', 'category': 'Food'},
-        {'name': 'Relax at the National Garden of Athens', 'category': 'Parks/Gardens'},
-        {'name': 'Taste Greek Baklava', 'category': 'Food'},
-        {'name': 'Explore Monastiraki Flea Market', 'category': 'Sights'},
-        {'name': 'Visit the Temple of Olympian Zeus', 'category': 'Sights'},
-        {'name': 'Enjoy the view from Mount Lycabettus', 'category': 'Sights'},
-        {'name': 'Take a stroll through Anafiotika', 'category': 'Sights'},
-        {'name': 'See the Statue of Athena Promachos', 'category': 'Statues'},
-        {'name': 'Learn history at Benaki Museum', 'category': 'Museums'},
-        {'name': 'Watch a play at the Odeon of Herodes Atticus', 'category': 'Sights'},
-        {'name': 'Visit the Museum of Cycladic Art', 'category': 'Museums'},
-        {'name': 'Have a coffee in Kolonaki', 'category': 'Food'},
-        {'name': 'Explore the Panathenaic Stadium', 'category': 'Sights'},
-        {'name': 'Take a tour of the Zappeion Hall', 'category': 'Sights'},
-        {'name': 'See the Hadrian’s Library', 'category': 'Sights'},
-      ];
-
-      // Add challenges to Firestore under the specific city
-      for (int i = 0; i < challenges.length; i++) {
-        await _firestore
-            .collection('cities')
-            .doc(cityName.toLowerCase())
-            .collection('challenges')
-            .doc('challenge_$i')
-            .set(challenges[i]);
-      }
-      print("Challenges added for $cityName.");
-    } catch (e) {
-      print("Error adding challenges for $cityName: $e");
-    }
-  }
-}
-*/
-
-class PopulateChallengesManual {
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-
-  Future<void> addChallengesForCity(String cityName, List<Map<String, dynamic>> challenges) async {
-    try {
-      // Add challenges to Firestore under the specific city
-      for (int i = 0; i < challenges.length; i++) {
-        await _firestore
-            .collection('cities')
-            .doc(cityName.toLowerCase())
-            .collection('challenges')
-            .doc('challenge_$i')
-            .set({
-          'name': challenges[i]['name'],
-          'category': challenges[i]['category'],
-          'gps_verifiable': challenges[i]['gps_verifiable'] ?? false, // Default to false if not provided
-          'location': challenges[i]['location'], // Can be null if not GPS verifiable
-        });
-      }
-      print("Challenges added for $cityName.");
-    } catch (e) {
-      print("Error adding challenges for $cityName: $e");
-    }
   }
 }
