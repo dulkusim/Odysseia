@@ -1,23 +1,23 @@
 // ignore_for_file: deprecated_member_use, use_build_context_synchronously
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart'; // Import Firebase core
-import 'firebase_options.dart'; // Generated file for Firebase configuration
+import '../firebase_options.dart'; // Generated file for Firebase configuration
 //import 'package:fproject/components/city_image.dart';
-import 'components/search_bar.dart'; // Import the reusable widget
-import 'components/image_card.dart'; // Import the reusable widget
-import 'components/challenge_card.dart'; // Import the reusable widget
+import '../components/search_bar.dart'; // Import the reusable widget
+import '../components/image_card.dart'; // Import the reusable widget
+import '../components/challenge_card.dart'; // Import the reusable widget
 import 'package:hugeicons/hugeicons.dart';
-import 'components/profile_header.dart'; // Import the reusable widget
-import 'components/awards_section.dart'; // Import the reusable widget
-import 'components/cities_section.dart'; // Import the reusable widget
-import 'components/friends_section.dart'; // Import the reusable widget
-import 'components/gallery_section.dart'; // Import the reusable widget
+import '../components/profile_header.dart'; // Import the reusable widget
+import '../components/awards_section.dart'; // Import the reusable widget
+import '../components/cities_section.dart'; // Import the reusable widget
+import '../components/friends_section.dart'; // Import the reusable widget
+import '../components/gallery_section.dart'; // Import the reusable widget
 import 'package:fproject/screens/awards_screen.dart';
 import 'package:fproject/screens/cities_screen.dart';
 import 'package:fproject/screens/friends_screen.dart';
 import 'package:fproject/screens/gallery_screen.dart';
 import 'package:fproject/screens/settings_screen.dart';
-import 'components/challenge_screen_widget.dart'; // Import the reusable widget
+import '../components/challenge_screen_widget.dart'; // Import the reusable widget
 //import 'screens/sign_in_screen.dart'; // Import Sign In Screen
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -948,83 +948,51 @@ class CityPageInfo extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: Colors.black),
+          icon: Icon(Icons.arrow_back),
           onPressed: () {
             Navigator.pop(context); // Go back to the previous screen
           },
         ),
         title: Text(
           cityName,
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
-            fontSize: 25,
-            color: Colors.black,
-          ),
+          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
         ),
-        centerTitle: false,
-        backgroundColor: Colors.white,
-        elevation: 0,
         actions: [
           Padding(
-            padding: const EdgeInsets.only(right: 20.0),
+            padding: const EdgeInsets.only(right: 10.0),
             child: TextButton.icon(
               onPressed: () {
+                // Handle button press logic here
                 print('Begin button pressed for $cityName');
               },
-              label: Text(
-                'Begin',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 22,
-                ),
-              ),
               icon: Icon(
                 HugeIcons.strokeRoundedSword03,
                 color: Colors.white,
                 size: 30,
               ),
+              label: Text(
+                'Begin',
+                style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+              ),
               style: TextButton.styleFrom(
-                backgroundColor: Color(0xFF11366D), // Dark blue
+                backgroundColor: Color(0xFF0D47A1), // Custom background color
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(20.0),
+                  borderRadius: BorderRadius.circular(20.0), // Rounded edges
                 ),
-                padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               ),
             ),
           ),
         ],
         bottom: PreferredSize(
-          preferredSize: Size.fromHeight(1.0),
+          preferredSize: Size.fromHeight(2.0),
           child: Divider(thickness: 1.0, height: 1.0, color: Colors.black),
         ),
       ),
-      body: FutureBuilder<DocumentSnapshot>(
-        future: FirebaseFirestore.instance.collection('cities').doc(cityName.toLowerCase()).get(),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return Center(child: CircularProgressIndicator());
-          } else if (snapshot.hasError) {
-            return Center(child: Text("Error loading data."));
-          } else if (!snapshot.hasData || !snapshot.data!.exists) {
-            return Center(child: Text("City not found."));
-          } else {
-            final cityData = snapshot.data!.data() as Map<String, dynamic>;
-            final cityImages = List<String>.from(cityData['CityImages'] ?? []);
-            final cityDescription = cityData['CityDescription'] ?? "No description available.";
-
-            return SingleChildScrollView(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  CityImageSection(cityImages: cityImages),
-                  CityPageDescription(description: cityDescription),
-                  DisplayChallengeCards(cityName: cityName)
-                ],
-              ),
-            );
-          }
-        },
+      body: Center(
+        child: Text(
+          'City Page Info for $cityName',
+          style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+        ),
       ),
     );
   }
@@ -1091,7 +1059,7 @@ class CityPageDescState extends State<CityPageDescription> {
         children: [
           Text(
             isExpanded ? widget.description : "${widget.description.substring(0, 130)}...",
-            style: TextStyle(fontSize: 18, color: Colors.black),
+            style: TextStyle(fontSize: 16, color: Colors.black),
           ),
           const SizedBox(height: 8),
           GestureDetector(
@@ -1156,7 +1124,7 @@ class DisplayChallengeCards extends StatelessWidget {
             itemBuilder: (context, index) {
               final challenge = challenges[index];
               return Padding(
-                padding: const EdgeInsets.symmetric(vertical: 1.0),
+                padding: const EdgeInsets.symmetric(vertical: 8.0),
                 child: ChallengeCard(
                   title: challenge['name'],
                   category: challenge['category'],
