@@ -31,41 +31,8 @@ void main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
+
   runApp(const OdysseiaApp());
-}
-
-Future<void> addImagesToChallenges(String cityName, List<String> imageUrls) async {
-  try {
-    // Reference the challenges collection for the specific city
-    CollectionReference challengesCollection = FirebaseFirestore.instance
-        .collection('cities')
-        .doc(cityName.toLowerCase()) // Assuming city names are stored in lowercase
-        .collection('challenges');
-
-    // Fetch all challenge documents
-    QuerySnapshot snapshot = await challengesCollection.get();
-
-    if (snapshot.docs.length != imageUrls.length) {
-      print("Number of images provided doesn't match the number of challenges!");
-      return;
-    }
-
-    // Loop through each document and add the image attribute
-    for (int i = 0; i < snapshot.docs.length; i++) {
-      String challengeId = snapshot.docs[i].id;
-      String imageUrl = imageUrls[i];
-
-      // Update the document with the image URL
-      await challengesCollection.doc(challengeId).update({
-        'image': imageUrl,
-      });
-      print("Added image for challenge $challengeId: $imageUrl");
-    }
-
-    print("Images added successfully for all challenges in $cityName.");
-  } catch (e) {
-    print("Error adding images to challenges: $e");
-  }
 }
 
 class SignInScreen extends StatefulWidget {

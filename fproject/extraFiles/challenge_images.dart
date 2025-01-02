@@ -34,33 +34,57 @@ Future<void> addImagesToChallenges(String cityName, List<String> imageUrls) asyn
   }
 }
 */
-/*void main() async {
-  // List of image URLs for the challenges
+/*
+void main() async {
+// List of image URLs for the challenges
 List<String> budapestImages = [
-    'https://upload.wikimedia.org/wikipedia/commons/thumb/b/bb/Royal_Castle_in_Warsaw%2C_Poland%2C_2022%2C_03.jpg/1024px-Royal_Castle_in_Warsaw%2C_Poland%2C_2022%2C_03.jpg', //0
-    'https://upload.wikimedia.org/wikipedia/commons/thumb/3/35/Warsaw_Old_Town_Market_Square_10.JPG/1280px-Warsaw_Old_Town_Market_Square_10.JPG', //1
-    'https://images.unsplash.com/photo-1573362924900-6395ff462288?q=80&w=2073&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D', //2
-    'https://upload.wikimedia.org/wikipedia/commons/thumb/2/26/Museum_of_the_History_of_Polish_Jews_in_Warsaw_building_0011.jpg/1280px-Museum_of_the_History_of_Polish_Jews_in_Warsaw_building_0011.jpg', //3
-    'https://upload.wikimedia.org/wikipedia/commons/thumb/0/0f/Pierogi_z_mas%C5%82em_-_2023.03.31.jpg/800px-Pierogi_z_mas%C5%82em_-_2023.03.31.jpg', //4
-    'https://images.unsplash.com/photo-1565351605775-a9df88c818a1?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D', //5
-    'https://upload.wikimedia.org/wikipedia/commons/thumb/4/4d/Warszawa-Ogr%C3%B3d_Saski_fontanna.jpg/1280px-Warszawa-Ogr%C3%B3d_Saski_fontanna.jpg', //6
-    'https://upload.wikimedia.org/wikipedia/commons/thumb/c/cd/Muzeum_Powstania_Warszawskiego_2023.jpg/1024px-Muzeum_Powstania_Warszawskiego_2023.jpg', //7
-    'https://images.unsplash.com/photo-1620999128404-6028e48ba01f?q=80&w=2069&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D', //8
-    'https://www.google.com/url?sa=i&url=https%3A%2F%2Fwww.polonist.com%2Fpolish-zurek-soup%2F&psig=AOvVaw3AuiMlDUUer16tsNI5udAM&ust=1735685267721000&source=images&cd=vfe&opi=89978449&ved=0CBAQjRxqFwoTCND9n9HJ0IoDFQAAAAAdAAAAABAE', //9
-    'https://images.unsplash.com/photo-1464520606738-6dab99180409?q=80&w=2071&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D', //10
-    'https://upload.wikimedia.org/wikipedia/commons/2/21/Widok_na_krakowskie_przedmiescie_po_remoncie.jpg', //11
-    'https://lh3.googleusercontent.com/p/AF1QipOlpYglgDF6NaewuW-PlZhtHljWVSaynDJijd8D=s1360-w1360-h1020', //12
-    'https://upload.wikimedia.org/wikipedia/commons/thumb/7/71/Zentrumkop1_DSC1330.JPG/1280px-Zentrumkop1_DSC1330.JPG', //13
-    'https://upload.wikimedia.org/wikipedia/commons/thumb/f/f2/Bigos_%281%29.jpg/1024px-Bigos_%281%29.jpg', //14
-    'https://upload.wikimedia.org/wikipedia/commons/thumb/7/7b/Barbakan_w_Warszawie_-_03.jpg/1280px-Barbakan_w_Warszawie_-_03.jpg', //15
-    'https://upload.wikimedia.org/wikipedia/commons/thumb/1/1f/Zamek_Ostrogskich_w_Warszawie_2022.jpg/1024px-Zamek_Ostrogskich_w_Warszawie_2022.jpg', //16
-    'https://upload.wikimedia.org/wikipedia/commons/thumb/0/0e/Czerwienski_boulevard%2C_Krakow%2C_Poland.jpg/1920px-Czerwienski_boulevard%2C_Krakow%2C_Poland.jpg', //17
-    'https://upload.wikimedia.org/wikipedia/commons/thumb/7/73/Filharmonia_Narodowa_w_Warszawie_2020.jpg/800px-Filharmonia_Narodowa_w_Warszawie_2020.jpg', //18
-    'https://images.unsplash.com/photo-1613255347968-aa2aaa353976?q=80&w=1926&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D', //19
-    ];
+    'https://images.unsplash.com/photo-1555368062-a9b335f1e997?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTd8fGFjcm9wb2xpc3xlbnwwfHwwfHx8Mg%3D%3D', //0
+    'https://images.unsplash.com/photo-1676831410404-ee79a62c8188?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NHx8cGFydGhlbm9ufGVufDB8fDB8fHwy', //1
+    '', //10
+    '', //11
+    'https://images.unsplash.com/photo-1647665027158-4b29113244c3?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8M3x8cGxha2F8ZW58MHx8MHx8fDI%3D', //12
+    '', //13
+    '', //14
+    'https://images.pexels.com/photos/18604086/pexels-photo-18604086/free-photo-of-byzantine-and-christian-museum-in-athens.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2', //15
+    '', //16
+    '', //17
+    '', //18
+    '', //19
+    'https://images.unsplash.com/photo-1647665027158-4b29113244c3?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8M3x8cGxha2F8ZW58MHx8MHx8fDI%3D', //2
+    '', //3
+    'https://images.unsplash.com/photo-1734974121561-11aee7d3cebd?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8cGl0YSUyMGd5cm9zfGVufDB8fDB8fHwy', //4
+    'https://images.unsplash.com/photo-1595410604352-56442920c89e?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MXx8bHljYWJldHR1c3xlbnwwfHwwfHx8Mg%3D%3D', //5
+    'https://images.unsplash.com/photo-1722602199455-1a39542be0a4?q=80&w=2047&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D', //6
+    'https://images.unsplash.com/photo-1514864120528-927cf03d73d9?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTJ8fHN5bnRhZ21hfGVufDB8fDB8fHwy', //7
+    '', //8
+    '', //9
+];
+
+// Call the function to add images to challenges for Athens
+await addImagesToChallenges("athens", athensImages);
+}
 
 
-  // Call the function to add images to challenges for Athens
- // await addImagesToChallenges("athens", athensImages);
-//}
+List<String> cityImages = [
+    '', //0
+    '', //1
+    '', //10
+    '', //11
+    '', //12
+    '', //13
+    '', //14
+    '', //15
+    '', //16
+    '', //17
+    '', //18
+    '', //19
+    '', //2
+    '', //3
+    '', //4
+    '', //5
+    '', //6
+    '', //7
+    '', //8
+    '', //9
+];
 */
