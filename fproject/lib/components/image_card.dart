@@ -64,14 +64,14 @@ class CityCard extends StatelessWidget {
                     borderRadius: BorderRadius.circular(10.0),
                     child: Image.network(
                       snapshot.data!,
-                      width: 117,
-                      height: 80,
+                      width: 139,
+                      height: 95,
                       fit: BoxFit.cover,
                       errorBuilder: (context, error, stackTrace) {
                         return Container(
                           color: Colors.grey.shade300,
-                          width: 117,
-                          height: 80,
+                          width: 139,
+                          height: 90,
                           child: Icon(Icons.error, color: Colors.red),
                         );
                       },
@@ -83,7 +83,7 @@ class CityCard extends StatelessWidget {
             SizedBox(height: 8),
             Text(
               cityName,
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
             ),
           ],
         ),

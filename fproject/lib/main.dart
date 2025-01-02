@@ -641,7 +641,7 @@ class BasedOnPreferencesTextState extends State<BasedOnPreferencesText> {
             ),
           ),
         ),
-        SizedBox(height: 30),
+        SizedBox(height: 20),
         WeekendTripsSection(),
       ],
     );
@@ -853,7 +853,7 @@ class WeekendTripsSectionState extends State<WeekendTripsSection> {
             ),
           ),
         ),
-        SizedBox(height: 30),
+        SizedBox(height: 20),
 
         // "Popular Destinations" section
         PopularDestinationsSection(),
@@ -893,7 +893,7 @@ class PopularDestinationsSection extends StatelessWidget {
             ),
           ),
         ),
-        SizedBox(height: 30),
+        SizedBox(height: 20),
 
         // "Friends visited" section
         FriendsVisitedSection(),
@@ -933,6 +933,7 @@ class FriendsVisitedSection extends StatelessWidget {
             ),
           ),
         ),
+        SizedBox(height: 10),
       ],
     );
   }
