@@ -682,29 +682,34 @@ class BasedOnPreferencesTextState extends State<BasedOnPreferencesText> {
   @override
   void initState() {
     super.initState();
-    _fetchCities(); // Fetch all cities initially
-    _initializeUserId(); // Initialize userId
+    _initializeUserId(); // Initialize userId and fetch preferences
   }
 
   Future<void> _initializeUserId() async {
     final currentUser = FirebaseAuth.instance.currentUser;
     if (currentUser != null) {
-      setState(() {
-        userId = currentUser.uid; // Set the userId from the currently logged-in user
-      });
+      userId = currentUser.uid; // Set the userId from the currently logged-in user
+      await _fetchUserPreferences(); // Fetch preferences for the logged-in user
     }
   }
 
-  Future<void> _fetchCities() async {
+  Future<void> _fetchUserPreferences() async {
     try {
-      final snapshot = await FirebaseFirestore.instance.collection('cities').get();
-      final cityNames = snapshot.docs.map((doc) => doc['CityName'] as String).toList();
+      // Fetch user preferences from Firestore
+      final userSnapshot = await FirebaseFirestore.instance.collection('Users').doc(userId).get();
+      if (userSnapshot.exists) {
+        final userData = userSnapshot.data();
+        final preferences = List<String>.from(userData?['preferences'] ?? []);
+        
+        setState(() {
+          _selectedPreferences = preferences;
+        });
 
-      setState(() {
-        _filteredCities = cityNames;
-      });
+        // Filter cities based on preferences
+        await _filterCitiesByPreferences(preferences);
+      }
     } catch (e) {
-      print("Error fetching cities: $e");
+      print("Error fetching user preferences: $e");
     }
   }
 
@@ -718,7 +723,6 @@ class BasedOnPreferencesTextState extends State<BasedOnPreferencesText> {
 
       setState(() {
         _filteredCities = cities;
-        _selectedPreferences = preferences;
       });
     } catch (e) {
       print("Error filtering cities: $e");
