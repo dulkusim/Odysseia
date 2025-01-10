@@ -338,7 +338,7 @@ class MainScreenState extends State<MainScreen> {
   // Screens corresponding to each tab
   final List<Widget> _screens = [
     HomeScreen(), // Home screen
-    ChallengesScreen(cityName: "Athens, Greece"), // Challenges screen
+    ChallengesScreen(cityName: "Berlin"), // Challenges screen
     MapScreen(), // Map screen
     ProfileScreen(), // Profile screen
   ];

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:hugeicons/hugeicons.dart';
 import 'challenge_card2.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class ChallengesScreen extends StatelessWidget {
   final String cityName;
@@ -146,7 +147,7 @@ class ChallengesScreen extends StatelessWidget {
                 ),
               ),
               SizedBox(height: 30),
-              ChallengesText(), // Use the new widget here
+              ChallengesText(cityName: cityName), // Use the new widget here
             ],
           ),
         ),
@@ -156,32 +157,73 @@ class ChallengesScreen extends StatelessWidget {
 }
 
 class ChallengesText extends StatelessWidget {
+  final String cityName;
+
+  const ChallengesText({required this.cityName, Key? key}) : super(key: key);
   @override
   Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          "Challenges (5)",
+          "Challenges (20)",
           style: TextStyle(fontSize: 25, color: Colors.black),
         ),
-        DisplayChallengeCardsReal(),
+        DisplayChallengeCardsReal(cityName: cityName),
       ],
     );
   }
 }
 
 class DisplayChallengeCardsReal extends StatelessWidget {
+  final String cityName;
+
+  const DisplayChallengeCardsReal({required this.cityName, Key? key}) : super(key: key);
+
+  Future<List<Map<String, dynamic>>> fetchChallenges(String cityName) async {
+    try {
+      final snapshot = await FirebaseFirestore.instance
+          .collection('cities')
+          .doc(cityName.toLowerCase())
+          .collection('challenges')
+          .get();
+
+      return snapshot.docs.map((doc) => doc.data()).toList();
+    } catch (e) {
+      print('Error fetching challenges for $cityName: $e');
+      return [];
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: List.generate(5, (index) {
-        return Padding(
-          padding: const EdgeInsets.symmetric(vertical: 8.0),
-          child: ChallengeCardReal(title: "Challenge $index", category: "Category $index"),
-        );
-      }),
+    return FutureBuilder<List<Map<String, dynamic>>>(
+      future: fetchChallenges(cityName),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return Center(child: CircularProgressIndicator());
+        } else if (snapshot.hasError || !snapshot.hasData || snapshot.data!.isEmpty) {
+          return Center(child: Text("No challenges available."));
+        } else {
+          final challenges = snapshot.data!;
+          return ListView.builder(
+            shrinkWrap: true,
+            physics: NeverScrollableScrollPhysics(),
+            itemCount: challenges.length,
+            itemBuilder: (context, index) {
+              final challenge = challenges[index];
+              return Padding(
+                padding: const EdgeInsets.symmetric(vertical: 8.0),
+                child: ChallengeCardReal(
+                  title: challenge['name'],
+                  category: challenge['category'],
+                  imageUrl: challenge['image'], // Display the challenge image
+                ),
+              );
+            },
+          );
+        }
+      },
     );
   }
 }

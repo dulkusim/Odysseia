@@ -16,7 +16,7 @@ class ChallengeCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 10.0), // Add vertical padding
+      padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 10.0),
       child: Card(
         elevation: 8.0,
         shape: RoundedRectangleBorder(
