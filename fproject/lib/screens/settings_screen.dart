@@ -1,7 +1,11 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'package:flutter/material.dart';
 import 'package:fproject/screens/account_settings_screen.dart';
 import 'package:fproject/screens/notifications_screen.dart';
 import 'package:fproject/screens/user_preferences_screen.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:fproject/main.dart';
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({Key? key}) : super(key: key);
@@ -86,10 +90,26 @@ class SettingsScreen extends StatelessWidget {
           style: TextStyle(fontSize: 22.0),
         ),
         leading: const Icon(Icons.logout, size: 30.0),
-        onTap: () {
-          // Implement log out logic
+        onTap: () async {
+          try {
+            // Log out the user
+            await FirebaseAuth.instance.signOut();
+
+            // Navigate to the sign-in page
+            Navigator.pushAndRemoveUntil(
+              context,
+              MaterialPageRoute(builder: (context) => SignInScreen()),
+              (route) => false, // Remove all previous routes
+            );
+          } catch (e) {
+            // Handle any errors during logout
+            print("Error during sign out: $e");
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text("Error logging out. Please try again.")),
+            );
+          }
         },
-          ),
+        ),
         const Divider(color: Colors.grey),
         ],
       ),

@@ -35,146 +35,6 @@ void main() async {
   runApp(const OdysseiaApp());
 }
 
-class SignInScreen extends StatefulWidget {
-  const SignInScreen({Key? key}) : super(key: key);
-
-  @override
-  State<SignInScreen> createState() => SignInScreenState();
-}
-
-class SignInScreenState extends State<SignInScreen> {
-  final FirebaseAuth _auth = FirebaseAuth.instance;
-  final TextEditingController _emailController = TextEditingController();
-  final TextEditingController _passwordController = TextEditingController();
-  String? _errorMessage;
-
-  bool _isPasswordHidden = true; // Boolean to toggle password visibility
-
-  Future<void> _signIn() async {
-    try {
-      // Authenticate user
-      await _auth.signInWithEmailAndPassword(
-        email: _emailController.text.trim(),
-        password: _passwordController.text.trim(),
-      );
-
-      // Navigate to MainScreen on successful sign-in
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => MainScreen()),
-      );
-    } on FirebaseAuthException catch (e) {
-      setState(() {
-        if (e.code == 'user-not-found') {
-          _errorMessage = 'No user found for this email.';
-        } else if (e.code == 'wrong-password') {
-          _errorMessage = 'Incorrect password.';
-        } else {
-          _errorMessage = 'Failed to sign in. Please try again.';
-        }
-      });
-    } catch (e) {
-      setState(() {
-        _errorMessage = 'An unexpected error occurred.';
-      });
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text("Sign In"),
-        centerTitle: true,
-        backgroundColor: Colors.white,
-        elevation: 0,
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(20.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            const Text(
-              "Welcome Back!",
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 24.0,
-                color: Colors.black,
-              ),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 30),
-
-            // Email Text Field
-            TextField(
-              controller: _emailController,
-              decoration: InputDecoration(
-                labelText: "Email",
-                border: OutlineInputBorder(),
-              ),
-            ),
-            const SizedBox(height: 20),
-
-            // Password Text Field with Show/Hide Icon
-            TextField(
-              controller: _passwordController,
-              decoration: InputDecoration(
-                labelText: "Password",
-                border: OutlineInputBorder(),
-                suffixIcon: IconButton(
-                  icon: Icon(
-                    _isPasswordHidden ? Icons.visibility : Icons.visibility_off,
-                  ),
-                  onPressed: () {
-                    setState(() {
-                      _isPasswordHidden = !_isPasswordHidden;
-                    });
-                  },
-                ),
-              ),
-              obscureText: _isPasswordHidden,
-            ),
-            const SizedBox(height: 10),
-
-            // Error Message
-            if (_errorMessage != null)
-              Text(
-                _errorMessage!,
-                style: const TextStyle(color: Colors.red),
-              ),
-            const SizedBox(height: 20),
-
-            // Sign In Button
-            ElevatedButton(
-              onPressed: _signIn,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.deepPurple,
-                padding: const EdgeInsets.symmetric(vertical: 15.0),
-              ),
-              child: const Text(
-                "Sign In",
-                style: TextStyle(fontSize: 18.0, color: Colors.white),
-              ),
-            ),
-
-            // Navigate to Sign Up
-            TextButton(
-              onPressed: () {
-                Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(builder: (context) => SignUpScreen()),
-                );
-              },
-              child: const Text("Don't have an account? Sign Up"),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
 class SignUpScreen extends StatefulWidget {
   const SignUpScreen({Key? key}) : super(key: key);
 
@@ -184,6 +44,7 @@ class SignUpScreen extends StatefulWidget {
 
 class SignUpScreenState extends State<SignUpScreen> {
   final FirebaseAuth _auth = FirebaseAuth.instance;
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance; // Firestore instance
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   String? _errorMessage;
@@ -193,10 +54,16 @@ class SignUpScreenState extends State<SignUpScreen> {
   Future<void> _signUp() async {
     try {
       // Create user with email and password
-      await _auth.createUserWithEmailAndPassword(
+      UserCredential userCredential = await _auth.createUserWithEmailAndPassword(
         email: _emailController.text.trim(),
         password: _passwordController.text.trim(),
       );
+
+      // Create a new user document in Firestore
+      final user = userCredential.user;
+      if (user != null) {
+        await _createUserDocument(user.uid);
+      }
 
       // Navigate to Sign-In Screen
       Navigator.pushReplacement(
@@ -217,6 +84,31 @@ class SignUpScreenState extends State<SignUpScreen> {
       setState(() {
         _errorMessage = 'An unexpected error occurred.';
       });
+    }
+  }
+
+  Future<void> _createUserDocument(String uid) async {
+    try {
+      // Initial user data
+      final initialUserData = {
+        'name': 'New User', // Default name
+        'email': _emailController.text.trim(),
+        'language': 'English', // Default language
+        'profilepicture': '', // Default empty profile picture
+        'preferences': [], // Default empty preferences
+        'gallery': [], // Default empty gallery
+        'friends': [], // Default empty friends list
+        'awards': [], // Default empty awards list
+        'username': 'newuser',
+        'visitedcities': [],
+        'challenges': 10
+      };
+
+      // Save user data in Firestore
+      await _firestore.collection('Users').doc(uid).set(initialUserData);
+      print('User document created successfully');
+    } catch (e) {
+      print('Error creating user document: $e');
     }
   }
 
@@ -315,6 +207,176 @@ class SignUpScreenState extends State<SignUpScreen> {
   }
 }
 
+class SignInScreen extends StatefulWidget {
+  const SignInScreen({Key? key}) : super(key: key);
+
+  @override
+  State<SignInScreen> createState() => SignInScreenState();
+}
+
+class SignInScreenState extends State<SignInScreen> {
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance; // Firestore instance
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+  String? _errorMessage;
+
+  bool _isPasswordHidden = true; // Boolean to toggle password visibility
+
+  Future<void> _signIn() async {
+    try {
+      // Authenticate user
+      UserCredential userCredential = await _auth.signInWithEmailAndPassword(
+        email: _emailController.text.trim(),
+        password: _passwordController.text.trim(),
+      );
+
+      // Fetch user data from Firestore
+      final user = userCredential.user;
+      if (user != null) {
+        final userData = await _fetchUserData(user.uid);
+
+        if (userData.isNotEmpty) {
+          // Navigate to MainScreen and pass user data
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (context) => MainScreen(userData: userData), // Pass user data
+            ),
+          );
+        } else {
+          setState(() {
+            _errorMessage = 'Failed to fetch user data. Please try again.';
+          });
+        }
+      }
+    } on FirebaseAuthException catch (e) {
+      setState(() {
+        if (e.code == 'user-not-found') {
+          _errorMessage = 'No user found for this email.';
+        } else if (e.code == 'wrong-password') {
+          _errorMessage = 'Incorrect password.';
+        } else {
+          _errorMessage = 'Failed to sign in. Please try again.';
+        }
+      });
+    } catch (e) {
+      setState(() {
+        _errorMessage = 'An unexpected error occurred.';
+      });
+    }
+  }
+
+  Future<Map<String, dynamic>> _fetchUserData(String uid) async {
+    try {
+      final snapshot = await _firestore.collection('Users').doc(uid).get();
+
+      if (snapshot.exists) {
+        return snapshot.data() as Map<String, dynamic>;
+      } else {
+        throw Exception('User data not found.');
+      }
+    } catch (e) {
+      print('Error fetching user data: $e');
+      return {};
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text("Sign In"),
+        centerTitle: true,
+        backgroundColor: Colors.white,
+        elevation: 0,
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(20.0),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            const Text(
+              "Welcome Back!",
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 24.0,
+                color: Colors.black,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 30),
+
+            // Email Text Field
+            TextField(
+              controller: _emailController,
+              decoration: const InputDecoration(
+                labelText: "Email",
+                border: OutlineInputBorder(),
+              ),
+            ),
+            const SizedBox(height: 20),
+
+            // Password Text Field with Show/Hide Icon
+            TextField(
+              controller: _passwordController,
+              decoration: InputDecoration(
+                labelText: "Password",
+                border: const OutlineInputBorder(),
+                suffixIcon: IconButton(
+                  icon: Icon(
+                    _isPasswordHidden ? Icons.visibility : Icons.visibility_off,
+                  ),
+                  onPressed: () {
+                    setState(() {
+                      _isPasswordHidden = !_isPasswordHidden;
+                    });
+                  },
+                ),
+              ),
+              obscureText: _isPasswordHidden,
+            ),
+            const SizedBox(height: 10),
+
+            // Error Message
+            if (_errorMessage != null)
+              Text(
+                _errorMessage!,
+                style: const TextStyle(color: Colors.red),
+              ),
+            const SizedBox(height: 20),
+
+            // Sign In Button
+            ElevatedButton(
+              onPressed: _signIn,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.deepPurple,
+                padding: const EdgeInsets.symmetric(vertical: 15.0),
+              ),
+              child: const Text(
+                "Sign In",
+                style: TextStyle(fontSize: 18.0, color: Colors.white),
+              ),
+            ),
+
+            // Navigate to Sign Up
+            TextButton(
+              onPressed: () {
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(builder: (context) => const SignUpScreen()),
+                );
+              },
+              child: const Text("Don't have an account? Sign Up"),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+ 
 class OdysseiaApp extends StatelessWidget {
   const OdysseiaApp({Key? key}) : super(key: key);
 
@@ -322,12 +384,63 @@ class OdysseiaApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: SignUpScreen(), // Start with Sign-Up Screen
+      home: AuthWrapper(), // Start with an AuthWrapper to manage login state
     );
   }
 }
 
+class AuthWrapper extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return StreamBuilder<User?>(
+      stream: FirebaseAuth.instance.authStateChanges(), // Listen to auth state changes
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return Center(child: CircularProgressIndicator()); // Loading state
+        }
+
+        if (snapshot.hasData) {
+          // User is logged in, fetch user data
+          return FutureBuilder<Map<String, dynamic>>(
+            future: fetchUserData(snapshot.data!.uid),
+            builder: (context, userDataSnapshot) {
+              if (userDataSnapshot.connectionState == ConnectionState.waiting) {
+                return Center(child: CircularProgressIndicator());
+              } else if (userDataSnapshot.hasError || !userDataSnapshot.hasData) {
+                return Center(child: Text("Error loading user data"));
+              } else {
+                final userData = userDataSnapshot.data!;
+                return MainScreen(userData: userData); // Pass user data to MainScreen
+              }
+            },
+          );
+        } else {
+          return SignInScreen(); // User not logged in, show SignInScreen
+        }
+      },
+    );
+  }
+
+  Future<Map<String, dynamic>> fetchUserData(String uid) async {
+    try {
+      final snapshot = await FirebaseFirestore.instance.collection('Users').doc(uid).get();
+      if (snapshot.exists) {
+        return snapshot.data() as Map<String, dynamic>;
+      } else {
+        throw Exception('User data not found');
+      }
+    } catch (e) {
+      print('Error fetching user data: $e');
+      return {};
+    }
+  }
+}
+
 class MainScreen extends StatefulWidget {
+  final Map<String, dynamic> userData; // Pass user data to MainScreen
+
+  const MainScreen({required this.userData, Key? key}) : super(key: key);
+
   @override
   MainScreenState createState() => MainScreenState();
 }
@@ -336,12 +449,20 @@ class MainScreenState extends State<MainScreen> {
   int _selectedIndex = 0; // Tracks the selected navigation item
 
   // Screens corresponding to each tab
-  final List<Widget> _screens = [
-    HomeScreen(), // Home screen
-    ChallengesScreen(cityName: "Berlin"), // Challenges screen
-    MapScreen(), // Map screen
-    ProfileScreen(), // Profile screen
-  ];
+  late List<Widget> _screens;
+
+  @override
+  void initState() {
+    super.initState();
+
+    // Initialize screens and pass userData where needed
+    _screens = [
+      HomeScreen(userData: widget.userData), // Home screen
+      ChallengesScreen(cityName: "Berlin"), // Challenges screen
+      MapScreen(), // Map screen
+      ProfileScreen(), // Profile screen
+    ];
+  }
 
   // Bottom Navigation Items
   final List<BottomNavigationBarItem> _navItems = [
@@ -388,6 +509,10 @@ class MainScreenState extends State<MainScreen> {
 }
 
 class HomeScreen extends StatefulWidget {
+  final Map<String, dynamic> userData; // Add userData as a parameter
+
+  const HomeScreen({required this.userData, Key? key}) : super(key: key);
+
   @override
   HomeScreenState createState() => HomeScreenState();
 }
@@ -406,8 +531,7 @@ class HomeScreenState extends State<HomeScreen> {
 
   Future<void> fetchCities() async {
     try {
-      final snapshot =
-          await FirebaseFirestore.instance.collection('cities').get();
+      final snapshot = await FirebaseFirestore.instance.collection('cities').get();
       setState(() {
         _searchSuggestions = snapshot.docs
             .map((doc) => doc['CityName'] as String)
@@ -423,8 +547,7 @@ class HomeScreenState extends State<HomeScreen> {
   }
 
   List<String> get _filteredSuggestions => _searchSuggestions
-      .where((item) =>
-          item.toLowerCase().startsWith(_searchQuery.toLowerCase()))
+      .where((item) => item.toLowerCase().startsWith(_searchQuery.toLowerCase()))
       .toList();
 
   List<int> get _filteredSuggestionIndices => _searchSuggestions
@@ -446,8 +569,7 @@ class HomeScreenState extends State<HomeScreen> {
               children: [
                 // Odysseia title and search bar
                 Padding(
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 20.0, vertical: 10.0),
+                  padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 10.0),
                   child: _isSearching
                       ? mySearchBar(
                           onSearch: (value) {
@@ -465,15 +587,20 @@ class HomeScreenState extends State<HomeScreen> {
                       : Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            Text(
-                              'Odysseia',
-                              style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 30.0,
-                              ),
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'Odysseia',
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 30.0,
+                                  ),
+                                ),
+                                ],
                             ),
                             IconButton(
-                              icon: Icon(Icons.search, size: 30),
+                              icon: const Icon(Icons.search, size: 30),
                               onPressed: () {
                                 setState(() {
                                   _isSearching = true;
@@ -483,14 +610,14 @@ class HomeScreenState extends State<HomeScreen> {
                           ],
                         ),
                 ),
-                Divider(
+                const Divider(
                   color: Colors.black,
                   thickness: 2,
                   height: 10,
                 ),
                 // "Based on your preferences" and its content
                 _isLoadingCities
-                    ? Center(child: CircularProgressIndicator())
+                    ? const Center(child: CircularProgressIndicator())
                     : BasedOnPreferencesText(),
               ],
             ),
@@ -515,8 +642,7 @@ class HomeScreenState extends State<HomeScreen> {
                       onTap: () {
                         // Fetch the correct index from the original database
                         final originalIndex = _filteredSuggestionIndices[index];
-                        final selectedCityName =
-                            _searchSuggestions[originalIndex];
+                        final selectedCityName = _searchSuggestions[originalIndex];
 
                         Navigator.push(
                           context,
@@ -551,11 +677,22 @@ class BasedOnPreferencesText extends StatefulWidget {
 class BasedOnPreferencesTextState extends State<BasedOnPreferencesText> {
   List<String> _selectedPreferences = [];
   List<String> _filteredCities = [];
+  String userId = ""; // Add a variable to store the userId
 
   @override
   void initState() {
     super.initState();
     _fetchCities(); // Fetch all cities initially
+    _initializeUserId(); // Initialize userId
+  }
+
+  Future<void> _initializeUserId() async {
+    final currentUser = FirebaseAuth.instance.currentUser;
+    if (currentUser != null) {
+      setState(() {
+        userId = currentUser.uid; // Set the userId from the currently logged-in user
+      });
+    }
   }
 
   Future<void> _fetchCities() async {
@@ -593,6 +730,7 @@ class BasedOnPreferencesTextState extends State<BasedOnPreferencesText> {
       context: context,
       builder: (context) {
         return FilterBottomSheet(
+          userId: userId, // Pass the userId here
           selectedFilters: _selectedPreferences,
           onFiltersApplied: (selectedFilters) {
             Navigator.pop(context); // Close the modal
@@ -649,10 +787,12 @@ class BasedOnPreferencesTextState extends State<BasedOnPreferencesText> {
 }
 
 class FilterBottomSheet extends StatefulWidget {
+  final String userId; // Add userId parameter
   final List<String> selectedFilters;
   final Function(List<String>) onFiltersApplied;
 
   const FilterBottomSheet({
+    required this.userId,
     required this.selectedFilters,
     required this.onFiltersApplied,
     Key? key,
@@ -679,6 +819,17 @@ class FilterBottomSheetState extends State<FilterBottomSheet> {
       if (_filters.containsKey(filter)) {
         _filters[filter] = true;
       }
+    }
+  }
+
+  Future<void> _savePreferences(List<String> preferences) async {
+    try {
+      await FirebaseFirestore.instance
+          .collection('Users')
+          .doc(widget.userId)
+          .update({'preferences': preferences});
+    } catch (e) {
+      print("Error saving preferences: $e");
     }
   }
 
@@ -725,6 +876,10 @@ class FilterBottomSheetState extends State<FilterBottomSheet> {
                   .where((entry) => entry.value)
                   .map((entry) => entry.key)
                   .toList();
+
+              // Save preferences to Firestore
+              _savePreferences(selectedFilters);
+
               widget.onFiltersApplied(selectedFilters);
             },
             style: ElevatedButton.styleFrom(
