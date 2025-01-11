@@ -5,12 +5,16 @@ class ChallengeCardReal extends StatelessWidget {
   final String title; // Challenge name
   final String category; // Challenge category
   final String? imageUrl; // Image for the challenge
+  final VoidCallback onRefresh; // Callback for refresh button
+  final VoidCallback onDelete; // Callback for delete button
 
   const ChallengeCardReal({
     Key? key,
     required this.title,
     required this.category,
     this.imageUrl,
+    required this.onRefresh,
+    required this.onDelete,
   }) : super(key: key);
 
   @override
@@ -61,49 +65,49 @@ class ChallengeCardReal extends StatelessWidget {
                             ),
                     ),
                     // Camera and Map Buttons
-                  Positioned(
-                    top: 5,
-                    right: 5,
-                    child: Row(
-                      children: [
-                        // Camera Button with Semi-Transparent Background
-                        Container(
-                          decoration: BoxDecoration(
-                            color: Colors.black.withOpacity(0.4), // Semi-transparent black background
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          child: IconButton(
-                            icon: const Icon(
-                              CupertinoIcons.camera,
-                              color: Colors.white,
-                              size: 25,
+                    Positioned(
+                      top: 5,
+                      right: 5,
+                      child: Row(
+                        children: [
+                          // Camera Button with Semi-Transparent Background
+                          Container(
+                            decoration: BoxDecoration(
+                              color: Colors.black.withOpacity(0.4), // Semi-transparent black background
+                              borderRadius: BorderRadius.circular(10),
                             ),
-                            onPressed: () {
-                              print("Camera button pressed");
-                            },
-                          ),
-                        ),
-                        const SizedBox(width: 8), // Spacing between buttons
-                        // Map Button with Semi-Transparent Background
-                        Container(
-                          decoration: BoxDecoration(
-                            color: Colors.black.withOpacity(0.4), // Semi-transparent black background
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          child: IconButton(
-                            icon: const Icon(
-                              CupertinoIcons.map,
-                              color: Colors.white,
-                              size: 25,
+                            child: IconButton(
+                              icon: const Icon(
+                                CupertinoIcons.camera,
+                                color: Colors.white,
+                                size: 25,
+                              ),
+                              onPressed: () {
+                                print("Camera button pressed");
+                              },
                             ),
-                            onPressed: () {
-                              print("Map button pressed");
-                            },
                           ),
-                        ),
-                      ],
+                          const SizedBox(width: 8), // Spacing between buttons
+                          // Map Button with Semi-Transparent Background
+                          Container(
+                            decoration: BoxDecoration(
+                              color: Colors.black.withOpacity(0.4), // Semi-transparent black background
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            child: IconButton(
+                              icon: const Icon(
+                                CupertinoIcons.map,
+                                color: Colors.white,
+                                size: 25,
+                              ),
+                              onPressed: () {
+                                print("Map button pressed");
+                              },
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
-                  ),
                   ],
                 ),
               ),
@@ -138,9 +142,7 @@ class ChallengeCardReal extends StatelessWidget {
                                 color: Colors.white,
                                 size: 25,
                               ),
-                              onPressed: () {
-                                print('Refresh button pressed for $title');
-                              },
+                              onPressed: onRefresh,
                             ),
                             IconButton(
                               icon: const Icon(
@@ -148,9 +150,7 @@ class ChallengeCardReal extends StatelessWidget {
                                 color: Colors.white,
                                 size: 25,
                               ),
-                              onPressed: () {
-                                print('Trash button pressed for $title');
-                              },
+                              onPressed: onDelete,
                             ),
                           ],
                         ),

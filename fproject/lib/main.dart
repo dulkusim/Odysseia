@@ -24,7 +24,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:fproject/screens/map_screen.dart'; 
 import 'package:geolocator/geolocator.dart';
 
-
 void main() async {
   WidgetsFlutterBinding.ensureInitialized(); // Ensure Flutter is ready
   // Initialize Firebase with configuration
@@ -462,64 +461,83 @@ class MainScreen extends StatefulWidget {
 }
 
 class MainScreenState extends State<MainScreen> {
-  int _selectedIndex = 0; // Tracks the selected navigation item
+  ValueNotifier<int> _selectedIndexNotifier = ValueNotifier<int>(0); // Use ValueNotifier
 
-  // Screens corresponding to each tab
   late List<Widget> _screens;
 
   @override
   void initState() {
     super.initState();
 
-    // Initialize screens and pass userData where needed
     _screens = [
-      HomeScreen(userData: widget.userData), // Home screen
-      ChallengesScreen(cityName: "Berlin"), // Challenges screen
-      MapScreen(), // Map screen
-      ProfileScreen(), // Profile screen
+      HomeScreen(userData: widget.userData),
+      _buildChallengesScreen(),
+      MapScreen(),
+      ProfileScreen(),
     ];
   }
 
-  // Bottom Navigation Items
-  final List<BottomNavigationBarItem> _navItems = [
-    BottomNavigationBarItem(
-      icon: Icon(Icons.home, size: 30),
-      label: 'Home',
-    ),
-    BottomNavigationBarItem(
-      icon: Icon(HugeIcons.strokeRoundedSword03, size: 30), // Challenges icon
-      label: 'Challenges',
-    ),
-    BottomNavigationBarItem(
-      icon: Icon(Icons.map, size: 25), // Map icon
-      label: 'Map',
-    ),
-    BottomNavigationBarItem(
-      icon: Icon(Icons.person, size: 30),
-      label: 'Profile',
-    ),
-  ];
+  Widget _buildChallengesScreen() {
+    return StreamBuilder<DocumentSnapshot>(
+      stream: FirebaseFirestore.instance
+          .collection('Users')
+          .doc(FirebaseAuth.instance.currentUser!.uid)
+          .snapshots(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return Center(child: CircularProgressIndicator());
+        }
+        if (snapshot.hasError || !snapshot.hasData || !snapshot.data!.exists) {
+          return Center(child: Text("No city selected"));
+        }
 
-  // Handle tab selection
-  void _onItemTapped(int index) {
-    setState(() {
-      _selectedIndex = index;
-    });
+        final userData = snapshot.data!.data() as Map<String, dynamic>;
+        final currentCity = userData['current_city'] ?? '';
+
+        if (currentCity.isEmpty) {
+          return Center(child: Text("No city selected"));
+        }
+
+        return ChallengesScreen(cityName: currentCity);
+      },
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: _screens[_selectedIndex], // Display the selected screen
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _selectedIndex,
-        onTap: _onItemTapped,
-        items: _navItems,
-        selectedItemColor: Colors.black, // Active icon color
-        unselectedItemColor: Colors.grey, // Inactive icon color
-        showUnselectedLabels: true,
-        type: BottomNavigationBarType.fixed,
-      ),
+    return ValueListenableBuilder<int>(
+      valueListenable: _selectedIndexNotifier,
+      builder: (context, selectedIndex, child) {
+        return Scaffold(
+          body: _screens[selectedIndex],
+          bottomNavigationBar: BottomNavigationBar(
+            currentIndex: selectedIndex,
+            onTap: (index) => _selectedIndexNotifier.value = index,
+            items: [
+              BottomNavigationBarItem(
+                icon: Icon(Icons.home, size: 30),
+                label: 'Home',
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(HugeIcons.strokeRoundedSword03, size: 30),
+                label: 'Challenges',
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.map, size: 25),
+                label: 'Map',
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.person, size: 30),
+                label: 'Profile',
+              ),
+            ],
+            selectedItemColor: Colors.black,
+            unselectedItemColor: Colors.grey,
+            showUnselectedLabels: true,
+            type: BottomNavigationBarType.fixed,
+          ),
+        );
+      },
     );
   }
 }
@@ -1119,6 +1137,39 @@ class CityPageInfo extends StatelessWidget {
 
   const CityPageInfo({required this.cityName, Key? key}) : super(key: key);
 
+Future<void> _beginTrip(BuildContext context) async {
+  final userId = FirebaseAuth.instance.currentUser!.uid;
+  final userDoc = FirebaseFirestore.instance.collection('Users').doc(userId);
+
+  final userSnapshot = await userDoc.get();
+  final currentCity = userSnapshot.data()?['current_city'] ?? "";
+
+  if (currentCity.isNotEmpty) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text("Active Trip"),
+        content: Text("You must end your current trip before starting a new one."),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text("OK"),
+          ),
+        ],
+      ),
+    );
+    return;
+  }
+
+  await userDoc.update({'current_city': cityName});
+
+  Navigator.pop(context); // Close the CityPageInfo screen
+
+  // Notify MainScreenState to switch to Challenges tab
+  final mainScreenState = context.findAncestorStateOfType<MainScreenState>();
+  mainScreenState?._selectedIndexNotifier.value = 1; // Switch to Challenges tab
+}
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -1144,9 +1195,7 @@ class CityPageInfo extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.only(right: 20.0),
             child: TextButton.icon(
-              onPressed: () {
-                print('Begin button pressed for $cityName');
-              },
+              onPressed: () => _beginTrip(context), // Use the _beginTrip function here
               label: Text(
                 'Begin',
                 style: TextStyle(
@@ -1195,7 +1244,7 @@ class CityPageInfo extends StatelessWidget {
                 children: [
                   CityImageSection(cityImages: cityImages),
                   CityPageDescription(description: cityDescription),
-                  DisplayChallengeCards(cityName: cityName)
+                  DisplayChallengeCards(cityName: cityName),
                 ],
               ),
             );
