@@ -77,15 +77,9 @@ class ChallengeCard extends StatelessWidget {
                             overflow: TextOverflow.ellipsis,
                           ),
                         ),
-                        // Refresh Button
-                        IconButton(
-                          icon: const Icon(CupertinoIcons.arrow_2_circlepath, color: Colors.white, size: 25),
-                          onPressed: () {
-                            print('Refresh button pressed for $title');
-                          },
-                        ),
                       ],
                     ),
+                    SizedBox(height: 10),
                     // Category Row
                     Row(
                       children: [
