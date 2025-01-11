@@ -2,11 +2,24 @@ import 'package:flutter/material.dart';
 import 'package:hugeicons/hugeicons.dart';
 import 'challenge_card2.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class ChallengesScreen extends StatelessWidget {
   final String cityName;
 
   const ChallengesScreen({required this.cityName, Key? key}) : super(key: key);
+
+  Future<void> _endOrCompleteTrip(BuildContext context, String action) async {
+  final userId = FirebaseAuth.instance.currentUser!.uid;
+  final userDoc = FirebaseFirestore.instance.collection('Users').doc(userId);
+
+  try {
+    // Update Firestore to remove the current city
+    await userDoc.update({'current_city': ''});
+  } catch (e) {
+    print("Error ending trip: $e");
+  }
+}
 
   @override
   Widget build(BuildContext context) {
@@ -20,12 +33,24 @@ class ChallengesScreen extends StatelessWidget {
           ),
         ),
         actions: [
-          IconButton(
-            icon: Icon(Icons.more_vert),
-            onPressed: () {
-              // Handle menu actions
-              print("More options pressed");
+          PopupMenuButton<String>(
+            onSelected: (value) {
+              if (value == 'Complete Trip') {
+                _endOrCompleteTrip(context, 'completed');
+              } else if (value == 'End Trip') {
+                _endOrCompleteTrip(context, 'ended');
+              }
             },
+            itemBuilder: (context) => [
+              PopupMenuItem(
+                value: 'Complete Trip',
+                child: Text('Complete Trip'),
+              ),
+              PopupMenuItem(
+                value: 'End Trip',
+                child: Text('End Trip'),
+              ),
+            ],
           ),
         ],
         bottom: PreferredSize(
@@ -43,11 +68,9 @@ class ChallengesScreen extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              SizedBox(height: 10), // Padding from the black line divider
-              // Profile and Buttons Row
+              SizedBox(height: 10),
               Row(
                 children: [
-                  // Profile Image
                   Expanded(
                     child: Stack(
                       children: [
@@ -76,7 +99,6 @@ class ChallengesScreen extends StatelessWidget {
                     ),
                   ),
                   SizedBox(width: 20),
-                  // Invite Button
                   ElevatedButton.icon(
                     onPressed: () {
                       print("Invite button pressed");
@@ -98,8 +120,7 @@ class ChallengesScreen extends StatelessWidget {
                           EdgeInsets.symmetric(horizontal: 10.0, vertical: 10.0),
                     ),
                   ),
-                  SizedBox(width: 20), // Added gap between buttons
-                  // Battle Button
+                  SizedBox(width: 20),
                   ElevatedButton.icon(
                     onPressed: () {
                       print("Battle button pressed");
@@ -119,13 +140,12 @@ class ChallengesScreen extends StatelessWidget {
                         borderRadius: BorderRadius.circular(20.0),
                       ),
                       padding: EdgeInsets.symmetric(horizontal: 10, vertical: 10.0),
-                      minimumSize: Size(100, 50), // Set minimum size for buttons
+                      minimumSize: Size(100, 50),
                     ),
                   ),
                 ],
               ),
               SizedBox(height: 30),
-              // Challenges Progress Bar
               Padding(
                 padding: EdgeInsets.symmetric(horizontal: 2.0),
                 child: Container(
@@ -133,21 +153,21 @@ class ChallengesScreen extends StatelessWidget {
                   height: 20,
                   decoration: BoxDecoration(
                     border: Border.all(
-                      color: Colors.black, // Border color
-                      width: 2.0, // Border width
+                      color: Colors.black,
+                      width: 2.0,
                     ),
                   ),
                   child: ClipRRect(
                     child: LinearProgressIndicator(
-                      value: 0.5, // 50% completion
+                      value: 0.5,
                       backgroundColor: Colors.grey.shade300,
-                      color: Color.fromARGB(255, 67, 177, 17), // Dark blue
+                      color: Color.fromARGB(255, 67, 177, 17),
                     ),
                   ),
                 ),
               ),
               SizedBox(height: 30),
-              ChallengesText(cityName: cityName), // Use the new widget here
+              ChallengesText(cityName: cityName),
             ],
           ),
         ),
