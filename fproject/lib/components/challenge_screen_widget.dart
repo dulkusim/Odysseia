@@ -225,63 +225,119 @@ class ChallengesText extends StatelessWidget {
   }
 }
 
-class DisplayChallengeCardsReal extends StatelessWidget {
+class DisplayChallengeCardsReal extends StatefulWidget {
   final String cityName;
 
   const DisplayChallengeCardsReal({required this.cityName, Key? key}) : super(key: key);
 
-  Future<List<Map<String, dynamic>>> fetchChallenges(String cityName) async {
+  @override
+  State<DisplayChallengeCardsReal> createState() => _DisplayChallengeCardsRealState();
+}
+
+class _DisplayChallengeCardsRealState extends State<DisplayChallengeCardsReal> {
+  List<Map<String, dynamic>> challenges = [];
+  int refreshLimit = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    fetchChallenges();
+  }
+
+  Future<void> fetchChallenges() async {
     try {
       final userId = FirebaseAuth.instance.currentUser!.uid;
       final userDoc = FirebaseFirestore.instance.collection('Users').doc(userId);
       final userSnapshot = await userDoc.get();
 
-      // Fetch the number of challenges from the user's preferences
       final numberOfChallenges = userSnapshot.data()?['challenges'] ?? 10;
+      refreshLimit = 19 - (numberOfChallenges as int);
 
-      // Fetch challenges from Firestore
       final snapshot = await FirebaseFirestore.instance
           .collection('cities')
-          .doc(cityName.toLowerCase())
+          .doc(widget.cityName.toLowerCase())
           .collection('challenges')
-          .limit(numberOfChallenges) // Limit the number of challenges
+          .limit(numberOfChallenges)
           .get();
 
-      return snapshot.docs.map((doc) => doc.data()).toList();
+      setState(() {
+        challenges = snapshot.docs.map((doc) => doc.data()).toList();
+      });
     } catch (e) {
-      print('Error fetching challenges for $cityName: $e');
-      return [];
+      print('Error fetching challenges for ${widget.cityName}: $e');
     }
+  }
+
+  void onRefresh(int index) async {
+    if (refreshLimit <= 0) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("No more refreshes allowed!")),
+      );
+      return;
+    }
+
+    try {
+      final allChallengesSnapshot = await FirebaseFirestore.instance
+          .collection('cities')
+          .doc(widget.cityName.toLowerCase())
+          .collection('challenges')
+          .get();
+
+      final allChallenges = allChallengesSnapshot.docs.map((doc) => doc.data()).toList();
+
+      // Exclude the current challenges to ensure a new one is picked
+      final remainingChallenges = allChallenges.where((challenge) {
+        return !challenges.contains(challenge);
+      }).toList();
+
+      if (remainingChallenges.isEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("No more new challenges available!")),
+        );
+        return;
+      }
+
+      // Select the next new challenge from the remaining ones
+      final newChallenge = remainingChallenges[refreshLimit % remainingChallenges.length];
+
+      setState(() {
+        challenges[index] = newChallenge; // Replace the challenge at the given index
+        refreshLimit--; // Decrease the refresh limit
+      });
+    } catch (e) {
+      print("Error refreshing challenge: $e");
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Failed to refresh challenge.")),
+      );
+    }
+  }
+
+  void onDelete(int index) {
+    setState(() {
+      challenges.removeAt(index);
+    });
   }
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<List<Map<String, dynamic>>>(
-      future: fetchChallenges(cityName),
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return Center(child: CircularProgressIndicator());
-        } else if (snapshot.hasError || !snapshot.hasData || snapshot.data!.isEmpty) {
-          return Center(child: Text("No challenges available."));
-        } else {
-          final challenges = snapshot.data!;
-          return ListView.builder(
-            shrinkWrap: true,
-            physics: NeverScrollableScrollPhysics(),
-            itemCount: challenges.length,
-            itemBuilder: (context, index) {
-              final challenge = challenges[index];
-              return Padding(
-                padding: const EdgeInsets.symmetric(vertical: 8.0),
-                child: ChallengeCardReal(
-                  title: challenge['name'],
-                  category: challenge['category'],
-                  imageUrl: challenge['image'],
-                ),
-              );
-            },
-          );
-        }
+    return ListView.builder(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      itemCount: challenges.length,
+      itemBuilder: (context, index) {
+        final challenge = challenges[index];
+        return Column(
+          children: [
+            ChallengeCardReal(
+              title: challenge['name'],
+              category: challenge['category'],
+              imageUrl: challenge['image'],
+              onRefresh: () => onRefresh(index),
+              onDelete: () => onDelete(index),
+            ),
+            SizedBox(height: 10),
+          ],
+        );
       },
     );
   }

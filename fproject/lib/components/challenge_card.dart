@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/cupertino.dart';
 
 class ChallengeCard extends StatelessWidget {
   final String title; // Challenge name
