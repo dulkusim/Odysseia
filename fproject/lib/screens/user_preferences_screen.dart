@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+
 
 class UserPreferencesScreen extends StatefulWidget {
   const UserPreferencesScreen({Key? key}) : super(key: key);
@@ -15,7 +18,7 @@ class _UserPreferencesScreenState extends State<UserPreferencesScreen> {
   String _timeFormat = "12-hour";
 
   // State for Number of Challenges
-  int _numberOfChallenges = 5;
+  int _numberOfChallenges = 10;
 
   // State for Challenge Difficulty
   final Map<String, bool> _challengeDifficulty = {
@@ -23,6 +26,40 @@ class _UserPreferencesScreenState extends State<UserPreferencesScreen> {
     "Medium": true,
     "Hard": true,
   };
+
+  @override
+  void initState() {
+    super.initState();
+    _loadUserPreferences();
+  }
+
+  Future<void> _loadUserPreferences() async {
+    final userId = FirebaseAuth.instance.currentUser!.uid;
+    final userDoc = FirebaseFirestore.instance.collection('Users').doc(userId);
+    final snapshot = await userDoc.get();
+
+    if (snapshot.exists) {
+      setState(() {
+        _numberOfChallenges = snapshot.data()?['challenges'] ?? 10;
+      });
+    }
+  }
+
+  Future<void> _updateChallenges(int number) async {
+    final userId = FirebaseAuth.instance.currentUser!.uid;
+    final userDoc = FirebaseFirestore.instance.collection('Users').doc(userId);
+
+    try {
+      await userDoc.update({'challenges': number});
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Number of challenges updated to $number")),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Failed to update challenges: $e")),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -131,6 +168,7 @@ class _UserPreferencesScreenState extends State<UserPreferencesScreen> {
                     setState(() {
                       _numberOfChallenges = value!;
                     });
+                    _updateChallenges(value!);
                   },
                   items: [5, 10, 12, 15].map((int value) {
                     return DropdownMenuItem<int>(

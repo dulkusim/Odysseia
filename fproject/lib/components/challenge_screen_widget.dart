@@ -180,17 +180,47 @@ class ChallengesText extends StatelessWidget {
   final String cityName;
 
   const ChallengesText({required this.cityName, Key? key}) : super(key: key);
+
+  Future<int> fetchNumberOfChallenges() async {
+    try {
+      final userId = FirebaseAuth.instance.currentUser!.uid;
+      final userDoc = FirebaseFirestore.instance.collection('Users').doc(userId);
+      final userSnapshot = await userDoc.get();
+
+      // Fetch the number of challenges from Firestore, default to 10 if not set
+      return userSnapshot.data()?['challenges'] ?? 10;
+    } catch (e) {
+      print("Error fetching number of challenges: $e");
+      return 10; // Default value
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          "Challenges (20)",
-          style: TextStyle(fontSize: 25, color: Colors.black),
-        ),
-        DisplayChallengeCardsReal(cityName: cityName),
-      ],
+    return FutureBuilder<int>(
+      future: fetchNumberOfChallenges(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return Center(child: CircularProgressIndicator());
+        }
+
+        if (snapshot.hasError || !snapshot.hasData) {
+          return Center(child: Text("Error loading challenges."));
+        }
+
+        final numberOfChallenges = snapshot.data!;
+
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              "Challenges ($numberOfChallenges)",
+              style: TextStyle(fontSize: 25, color: Colors.black),
+            ),
+            DisplayChallengeCardsReal(cityName: cityName),
+          ],
+        );
+      },
     );
   }
 }
@@ -202,10 +232,19 @@ class DisplayChallengeCardsReal extends StatelessWidget {
 
   Future<List<Map<String, dynamic>>> fetchChallenges(String cityName) async {
     try {
+      final userId = FirebaseAuth.instance.currentUser!.uid;
+      final userDoc = FirebaseFirestore.instance.collection('Users').doc(userId);
+      final userSnapshot = await userDoc.get();
+
+      // Fetch the number of challenges from the user's preferences
+      final numberOfChallenges = userSnapshot.data()?['challenges'] ?? 10;
+
+      // Fetch challenges from Firestore
       final snapshot = await FirebaseFirestore.instance
           .collection('cities')
           .doc(cityName.toLowerCase())
           .collection('challenges')
+          .limit(numberOfChallenges) // Limit the number of challenges
           .get();
 
       return snapshot.docs.map((doc) => doc.data()).toList();
@@ -237,7 +276,7 @@ class DisplayChallengeCardsReal extends StatelessWidget {
                 child: ChallengeCardReal(
                   title: challenge['name'],
                   category: challenge['category'],
-                  imageUrl: challenge['image'], // Display the challenge image
+                  imageUrl: challenge['image'],
                 ),
               );
             },
