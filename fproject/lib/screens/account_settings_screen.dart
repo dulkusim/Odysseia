@@ -1,7 +1,97 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:image_picker/image_picker.dart';
+import 'dart:io';
 
-class AccountSettingsScreen extends StatelessWidget {
+class AccountSettingsScreen extends StatefulWidget {
   const AccountSettingsScreen({Key? key}) : super(key: key);
+
+  @override
+  AccountSettingsScreenState createState() => AccountSettingsScreenState();
+}
+
+class AccountSettingsScreenState extends State<AccountSettingsScreen> {
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+
+  final TextEditingController _usernameController = TextEditingController();
+  String? _email;
+  String? _profilePictureUrl;
+  File? _newProfilePicture;
+
+  String? _errorMessage;
+  String? _successMessage;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadUserData();
+  }
+
+  Future<void> _loadUserData() async {
+    try {
+      final user = _auth.currentUser;
+      if (user != null) {
+        final snapshot =
+            await _firestore.collection('Users').doc(user.uid).get();
+        if (snapshot.exists) {
+          final userData = snapshot.data();
+          setState(() {
+            _usernameController.text = userData?['username'] ?? '';
+            _email = user.email;
+            _profilePictureUrl = userData?['profilepicture'];
+          });
+        }
+      }
+    } catch (e) {
+      setState(() {
+        _errorMessage = 'Failed to load user data.';
+      });
+    }
+  }
+
+  Future<void> _updateUsername() async {
+    try {
+      final user = _auth.currentUser;
+      if (user != null) {
+        await _firestore.collection('Users').doc(user.uid).update({
+          'username': _usernameController.text.trim(),
+        });
+        setState(() {
+          _successMessage = 'Username updated successfully.';
+          _errorMessage = null; // Clear any previous errors
+        });
+      }
+    } catch (e) {
+      setState(() {
+        _errorMessage = 'Failed to update username.';
+      });
+    }
+  }
+
+  Future<void> _changeProfilePicture() async {
+    try {
+      final picker = ImagePicker();
+      final pickedFile = await picker.pickImage(source: ImageSource.gallery);
+
+      if (pickedFile != null) {
+        setState(() {
+          _newProfilePicture = File(pickedFile.path);
+        });
+
+        // Update the Firestore or Firebase Storage here if necessary
+        setState(() {
+          _successMessage = 'Profile picture updated successfully.';
+          _errorMessage = null;
+        });
+      }
+    } catch (e) {
+      setState(() {
+        _errorMessage = 'Failed to update profile picture.';
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -22,64 +112,106 @@ class AccountSettingsScreen extends StatelessWidget {
         ),
       ),
       body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Card(
-              elevation: 2,
-              shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(10),
+        padding: const EdgeInsets.all(20.0),
+        child: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              if (_errorMessage != null)
+                Container(
+                  padding: const EdgeInsets.all(10),
+                  color: Colors.red.withOpacity(0.1),
+                  child: Text(
+                    _errorMessage!,
+                    style: const TextStyle(color: Colors.red),
+                  ),
+                ),
+              if (_successMessage != null)
+                Container(
+                  padding: const EdgeInsets.all(10),
+                  color: Colors.green.withOpacity(0.1),
+                  child: Text(
+                    _successMessage!,
+                    style: const TextStyle(color: Colors.green),
+                  ),
+                ),
+              const SizedBox(height: 20),
+              Center(
+                child: Stack(
+                  children: [
+                    CircleAvatar(
+                      radius: 50,
+                      backgroundImage: _newProfilePicture != null
+                          ? FileImage(_newProfilePicture!)
+                          : (_profilePictureUrl != null && _profilePictureUrl!.isNotEmpty
+                              ? NetworkImage(_profilePictureUrl!)
+                              : const AssetImage('assets/default_avatar.png'))
+                              as ImageProvider,
+                    ),
+                    Positioned(
+                      bottom: 0,
+                      right: 0,
+                      child: IconButton(
+                        icon: const Icon(Icons.camera_alt, color: Colors.black),
+                        onPressed: _changeProfilePicture,
+                      ),
+                    ),
+                  ],
+                ),
               ),
-              child: ListTile(
-              title: const Text(
-                "Username",
-                style: TextStyle(fontSize: 18),
+              const SizedBox(height: 20),
+              Container(
+                padding: const EdgeInsets.symmetric(vertical: 15.0, horizontal: 20.0),
+                decoration: BoxDecoration(
+                  color: Colors.purple.shade200,
+                  borderRadius: BorderRadius.circular(10.0),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Text(
+                      'Username',
+                      style: TextStyle(fontSize: 18.0, fontWeight: FontWeight.w500),
+                    ),
+                    Expanded(
+                      child: TextField(
+                        controller: _usernameController,
+                        decoration: const InputDecoration(
+                          border: InputBorder.none,
+                        ),
+                        textAlign: TextAlign.end,
+                      ),
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.check, color: Colors.black),
+                      onPressed: _updateUsername,
+                    ),
+                  ],
+                ),
               ),
-              subtitle: const Text(
-                "User123",
-                style: TextStyle(fontSize: 16),
+              const SizedBox(height: 20),
+              Container(
+                padding: const EdgeInsets.symmetric(vertical: 15.0, horizontal: 20.0),
+                decoration: BoxDecoration(
+                  color: Colors.purple.shade200,
+                  borderRadius: BorderRadius.circular(10.0),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Text(
+                      'Email',
+                      style: TextStyle(fontSize: 18.0, fontWeight: FontWeight.w500),
+                    ),
+                    Text(
+                      _email ?? '',
+                      style: const TextStyle(fontSize: 16.0, fontWeight: FontWeight.w400),
+                    ),
+                  ],
+                ),
               ),
-              leading: const Icon(Icons.person, size: 35),
-              ),
-            ),
-            const SizedBox(height: 10),
-            Card(
-              elevation: 2,
-              shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(10),
-              ),
-              child: ListTile(
-              title: const Text(
-                "Email",
-                style: TextStyle(fontSize: 18),
-              ),
-              subtitle: const Text(
-                "user@example.com",
-                style: TextStyle(fontSize: 16),
-              ),
-              leading: const Icon(Icons.email, size: 30),
-              ),
-            ),
-            const SizedBox(height: 10),
-            Card(
-              elevation: 2,
-              shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(10),
-              ),
-              child: ListTile(
-              title: const Text(
-                "Language",
-                style: TextStyle(fontSize: 18),
-              ),
-              subtitle: const Text(
-                "English",
-                style: TextStyle(fontSize: 16),
-              ),
-              leading: const Icon(Icons.language, size: 30),
-              ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

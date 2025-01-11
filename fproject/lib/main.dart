@@ -52,25 +52,28 @@ class SignUpScreenState extends State<SignUpScreen> {
   bool _isPasswordHidden = true; // Boolean to toggle password visibility
 
   Future<void> _signUp() async {
-    try {
-      // Create user with email and password
-      UserCredential userCredential = await _auth.createUserWithEmailAndPassword(
-        email: _emailController.text.trim(),
-        password: _passwordController.text.trim(),
-      );
+  try {
+    // Create user with email and password
+    UserCredential userCredential = await _auth.createUserWithEmailAndPassword(
+      email: _emailController.text.trim(),
+      password: _passwordController.text.trim(),
+    );
 
-      // Create a new user document in Firestore
-      final user = userCredential.user;
-      if (user != null) {
-        await _createUserDocument(user.uid);
-      }
+    // Create a new user document in Firestore
+    final user = userCredential.user;
+    if (user != null) {
+      await _createUserDocument(user.uid);
+    }
 
-      // Navigate to Sign-In Screen
+    // Navigate to Sign-In Screen
+    if (mounted) {
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => SignInScreen()),
+        MaterialPageRoute(builder: (context) => const SignInScreen()),
       );
-    } on FirebaseAuthException catch (e) {
+    }
+  } on FirebaseAuthException catch (e) {
+    if (mounted) {
       setState(() {
         if (e.code == 'weak-password') {
           _errorMessage = 'The password provided is too weak.';
@@ -80,37 +83,45 @@ class SignUpScreenState extends State<SignUpScreen> {
           _errorMessage = 'Failed to create account. Please try again.';
         }
       });
-    } catch (e) {
+    }
+  } catch (e) {
+    if (mounted) {
       setState(() {
         _errorMessage = 'An unexpected error occurred.';
       });
     }
   }
+}
+
 
   Future<void> _createUserDocument(String uid) async {
-    try {
-      // Initial user data
-      final initialUserData = {
-        'name': 'New User', // Default name
-        'email': _emailController.text.trim(),
-        'language': 'English', // Default language
-        'profilepicture': '', // Default empty profile picture
-        'preferences': [], // Default empty preferences
-        'gallery': [], // Default empty gallery
-        'friends': [], // Default empty friends list
-        'awards': [], // Default empty awards list
-        'username': 'newuser',
-        'visitedcities': [],
-        'challenges': 10
-      };
+  try {
+    // Extract the username from the email
+    final email = _emailController.text.trim();
+    final username = email.split('@')[0]; // Get the prefix before '@'
 
-      // Save user data in Firestore
-      await _firestore.collection('Users').doc(uid).set(initialUserData);
-      print('User document created successfully');
-    } catch (e) {
-      print('Error creating user document: $e');
-    }
+    // Initial user data
+    final initialUserData = {
+      'email': email,
+      'language': 'English', // Default language
+      'profilepicture': '', // Default empty profile picture
+      'preferences': [], // Default empty preferences
+      'gallery': [], // Default empty gallery
+      'friends': [], // Default empty friends list
+      'awards': [], // Default empty awards list
+      'username': username, // Set default username
+      'visitedcities': [],
+      'challenges': 10
+    };
+
+    // Save user data in Firestore
+    await _firestore.collection('Users').doc(uid).set(initialUserData);
+    print('User document created successfully');
+  } catch (e) {
+    print('Error creating user document: $e');
   }
+}
+
 
   @override
   Widget build(BuildContext context) {
@@ -224,33 +235,34 @@ class SignInScreenState extends State<SignInScreen> {
   bool _isPasswordHidden = true; // Boolean to toggle password visibility
 
   Future<void> _signIn() async {
-    try {
-      // Authenticate user
-      UserCredential userCredential = await _auth.signInWithEmailAndPassword(
-        email: _emailController.text.trim(),
-        password: _passwordController.text.trim(),
-      );
+  try {
+    // Authenticate user
+    UserCredential userCredential = await _auth.signInWithEmailAndPassword(
+      email: _emailController.text.trim(),
+      password: _passwordController.text.trim(),
+    );
 
-      // Fetch user data from Firestore
-      final user = userCredential.user;
-      if (user != null) {
-        final userData = await _fetchUserData(user.uid);
+    // Fetch user data from Firestore
+    final user = userCredential.user;
+    if (user != null) {
+      final userData = await _fetchUserData(user.uid);
 
-        if (userData.isNotEmpty) {
-          // Navigate to MainScreen and pass user data
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(
-              builder: (context) => MainScreen(userData: userData), // Pass user data
-            ),
-          );
-        } else {
-          setState(() {
-            _errorMessage = 'Failed to fetch user data. Please try again.';
-          });
-        }
+      if (userData.isNotEmpty && mounted) {
+        // Navigate to MainScreen and pass user data
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) => MainScreen(userData: userData),
+          ),
+        );
+      } else if (mounted) {
+        setState(() {
+          _errorMessage = 'Failed to fetch user data. Please try again.';
+        });
       }
-    } on FirebaseAuthException catch (e) {
+    }
+  } on FirebaseAuthException catch (e) {
+    if (mounted) {
       setState(() {
         if (e.code == 'user-not-found') {
           _errorMessage = 'No user found for this email.';
@@ -260,12 +272,16 @@ class SignInScreenState extends State<SignInScreen> {
           _errorMessage = 'Failed to sign in. Please try again.';
         }
       });
-    } catch (e) {
+    }
+  } catch (e) {
+    if (mounted) {
       setState(() {
         _errorMessage = 'An unexpected error occurred.';
       });
     }
   }
+}
+
 
   Future<Map<String, dynamic>> _fetchUserData(String uid) async {
     try {
