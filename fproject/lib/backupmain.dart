@@ -1,4 +1,4 @@
-// ignore_for_file: deprecated_member_use, use_build_context_synchronously
+/*// ignore_for_file: deprecated_member_use, use_build_context_synchronously
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart'; // Import Firebase core
 import '../firebase_options.dart'; // Generated file for Firebase configuration
@@ -1219,4 +1219,4 @@ class ProfileScreen extends StatelessWidget {
       ),
     );
   }
-}
+}*/

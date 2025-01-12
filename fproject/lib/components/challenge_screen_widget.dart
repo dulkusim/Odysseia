@@ -10,16 +10,20 @@ class ChallengesScreen extends StatelessWidget {
   const ChallengesScreen({required this.cityName, Key? key}) : super(key: key);
 
   Future<void> _endOrCompleteTrip(BuildContext context, String action) async {
-  final userId = FirebaseAuth.instance.currentUser!.uid;
-  final userDoc = FirebaseFirestore.instance.collection('Users').doc(userId);
+    final userId = FirebaseAuth.instance.currentUser!.uid;
+    final userDoc = FirebaseFirestore.instance.collection('Users').doc(userId);
 
-  try {
-    // Update Firestore to remove the current city
-    await userDoc.update({'current_city': ''});
-  } catch (e) {
-    print("Error ending trip: $e");
+    try {
+      // Update Firestore to remove the current city
+      await userDoc.update({'current_city': ''});
+      // Add the city to the visitedcities list
+      await userDoc.update({
+        'visitedcities': FieldValue.arrayUnion([cityName])
+      });
+    } catch (e) {
+      print("Error ending trip: $e");
+    }
   }
-}
 
   @override
   Widget build(BuildContext context) {

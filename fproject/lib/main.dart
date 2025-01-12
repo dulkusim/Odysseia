@@ -1433,7 +1433,7 @@ class ProfileScreen extends StatelessWidget {
               onShowAllPressed: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (_) => const CitiesScreen()),
+                  MaterialPageRoute(builder: (_) => CitiesScreen()),
                 );
               },
             ),
