@@ -10,16 +10,20 @@ class ChallengesScreen extends StatelessWidget {
   const ChallengesScreen({required this.cityName, Key? key}) : super(key: key);
 
   Future<void> _endOrCompleteTrip(BuildContext context, String action) async {
-  final userId = FirebaseAuth.instance.currentUser!.uid;
-  final userDoc = FirebaseFirestore.instance.collection('Users').doc(userId);
+    final userId = FirebaseAuth.instance.currentUser!.uid;
+    final userDoc = FirebaseFirestore.instance.collection('Users').doc(userId);
 
-  try {
-    // Update Firestore to remove the current city
-    await userDoc.update({'current_city': ''});
-  } catch (e) {
-    print("Error ending trip: $e");
+    try {
+      // Update Firestore to remove the current city
+      await userDoc.update({'current_city': ''});
+      // Add the city to the visitedcities list
+      await userDoc.update({
+        'visitedcities': FieldValue.arrayUnion([cityName])
+      });
+    } catch (e) {
+      print("Error ending trip: $e");
+    }
   }
-}
 
   @override
   Widget build(BuildContext context) {
@@ -244,29 +248,43 @@ class _DisplayChallengeCardsRealState extends State<DisplayChallengeCardsReal> {
     fetchChallenges();
   }
 
-  Future<void> fetchChallenges() async {
-    try {
-      final userId = FirebaseAuth.instance.currentUser!.uid;
-      final userDoc = FirebaseFirestore.instance.collection('Users').doc(userId);
-      final userSnapshot = await userDoc.get();
+Future<void> fetchChallenges() async {
+  try {
+    final userId = FirebaseAuth.instance.currentUser!.uid;
+    final userDoc = FirebaseFirestore.instance.collection('Users').doc(userId);
+    final userSnapshot = await userDoc.get();
 
-      final numberOfChallenges = userSnapshot.data()?['challenges'] ?? 10;
-      refreshLimit = 19 - (numberOfChallenges as int);
+    final numberOfChallenges = userSnapshot.data()?['challenges'] ?? 10;
+    refreshLimit = 19 - (numberOfChallenges as int);
 
-      final snapshot = await FirebaseFirestore.instance
-          .collection('cities')
-          .doc(widget.cityName.toLowerCase())
-          .collection('challenges')
-          .limit(numberOfChallenges)
-          .get();
+    final snapshot = await FirebaseFirestore.instance
+        .collection('cities')
+        .doc(widget.cityName.toLowerCase())
+        .collection('challenges')
+        .limit(numberOfChallenges)
+        .get();
 
-      setState(() {
-        challenges = snapshot.docs.map((doc) => doc.data()).toList();
-      });
-    } catch (e) {
-      print('Error fetching challenges for ${widget.cityName}: $e');
-    }
+    setState(() {
+      challenges = snapshot.docs.map((doc) {
+        final data = doc.data();
+        final location = data['location']; // Retrieve the GeoPoint
+        return {
+          'name': data['name'],
+          'category': data['category'],
+          'image': data['image'],
+          'location': location != null
+              ? {
+                  'latitude': location.latitude,
+                  'longitude': location.longitude,
+                }
+              : null, // Convert GeoPoint to a map
+        };
+      }).toList();
+    });
+  } catch (e) {
+    print('Error fetching challenges for ${widget.cityName}: $e');
   }
+}
 
   void onRefresh(int index) async {
     if (refreshLimit <= 0) {
@@ -332,10 +350,11 @@ class _DisplayChallengeCardsRealState extends State<DisplayChallengeCardsReal> {
               title: challenge['name'],
               category: challenge['category'],
               imageUrl: challenge['image'],
+              location: challenge['location'], // Pass the location to the card
               onRefresh: () => onRefresh(index),
               onDelete: () => onDelete(index),
             ),
-            SizedBox(height: 10),
+            const SizedBox(height: 10),
           ],
         );
       },
