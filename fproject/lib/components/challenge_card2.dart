@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:geolocator/geolocator.dart';
 
 class ChallengeCardReal extends StatelessWidget {
   final String title; // Challenge name
   final String category; // Challenge category
   final String? imageUrl; // Image for the challenge
+  final Map<String, dynamic>? location; // Challenge location (latitude, longitude)
   final VoidCallback onRefresh; // Callback for refresh button
   final VoidCallback onDelete; // Callback for delete button
 
@@ -13,14 +15,80 @@ class ChallengeCardReal extends StatelessWidget {
     required this.title,
     required this.category,
     this.imageUrl,
+    this.location,
     required this.onRefresh,
     required this.onDelete,
   }) : super(key: key);
 
+  Future<void> _checkLocation(BuildContext context) async {
+    // Ensure location is present and properly formatted
+    if (location == null || location!['latitude'] == null || location!['longitude'] == null) {
+      _showDialog(
+        context,
+        title: "No Location",
+        content: "This challenge doesn't have a valid location to verify.",
+      );
+      return;
+    }
+
+    try {
+      // Get the user's current location
+      Position userPosition = await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
+
+      // Calculate distance between user and challenge location
+      double distance = Geolocator.distanceBetween(
+        userPosition.latitude,
+        userPosition.longitude,
+        location!['latitude'],
+        location!['longitude'],
+      );
+
+      if (distance <= 5000) {
+        // User is within 5000 meters
+        _showDialog(
+          context,
+          title: "Challenge Completed!",
+          content: "You are within 5000 meters of the challenge location.",
+        );
+      } else {
+        // User is not within 500 meters
+        _showDialog(
+          context,
+          title: "Not the Right Location",
+          content: "You are not within 5000 meters of the challenge location.",
+        );
+      }
+    } catch (e) {
+      // Handle location fetching errors
+      print("Error fetching location: $e");
+      _showDialog(
+        context,
+        title: "Error",
+        content: "Unable to fetch your location. Please enable GPS and try again.",
+      );
+    }
+  }
+
+  void _showDialog(BuildContext context, {required String title, required String content}) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(title),
+        content: Text(content),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text("OK"),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 0.0, vertical: 0.0), // Consistent padding
+      padding: const EdgeInsets.symmetric(horizontal: 0.0, vertical: 0.0),
       child: Card(
         elevation: 8.0,
         shape: RoundedRectangleBorder(
@@ -29,29 +97,27 @@ class ChallengeCardReal extends StatelessWidget {
         child: Container(
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(10),
-            color: const Color.fromARGB(255, 2, 6, 109), // Background color
+            color: const Color.fromARGB(255, 2, 6, 109),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Image with overlay buttons
               Container(
-                height: 200, // Image height
-                width: double.infinity, // Full width
+                height: 200,
+                width: double.infinity,
                 decoration: BoxDecoration(
                   borderRadius: const BorderRadius.vertical(top: Radius.circular(10)),
                 ),
                 child: Stack(
                   children: [
-                    // Image
                     ClipRRect(
                       borderRadius: const BorderRadius.vertical(top: Radius.circular(10)),
                       child: imageUrl != null
                           ? Image.network(
                               imageUrl!,
-                              width: double.infinity, // Full width
-                              height: 200, // Ensure height consistency
-                              fit: BoxFit.cover, // Ensures the image fills the space
+                              width: double.infinity,
+                              height: 200,
+                              fit: BoxFit.cover,
                               errorBuilder: (context, error, stackTrace) => Container(
                                 color: Colors.grey[300],
                                 child: const Icon(Icons.error, color: Colors.red, size: 50),
@@ -59,21 +125,19 @@ class ChallengeCardReal extends StatelessWidget {
                             )
                           : Container(
                               color: Colors.grey[300],
-                              child: Center(
-                                child: Icon(Icons.image, size: 50.0, color: Colors.grey[500]),
+                              child: const Center(
+                                child: Icon(Icons.image, size: 50.0, color: Colors.grey),
                               ),
                             ),
                     ),
-                    // Camera and Map Buttons
                     Positioned(
                       top: 5,
                       right: 5,
                       child: Row(
                         children: [
-                          // Camera Button with Semi-Transparent Background
                           Container(
                             decoration: BoxDecoration(
-                              color: Colors.black.withOpacity(0.4), // Semi-transparent black background
+                              color: Colors.black.withOpacity(0.4),
                               borderRadius: BorderRadius.circular(10),
                             ),
                             child: IconButton(
@@ -87,11 +151,10 @@ class ChallengeCardReal extends StatelessWidget {
                               },
                             ),
                           ),
-                          const SizedBox(width: 8), // Spacing between buttons
-                          // Map Button with Semi-Transparent Background
+                          const SizedBox(width: 8),
                           Container(
                             decoration: BoxDecoration(
-                              color: Colors.black.withOpacity(0.4), // Semi-transparent black background
+                              color: Colors.black.withOpacity(0.4),
                               borderRadius: BorderRadius.circular(10),
                             ),
                             child: IconButton(
@@ -100,9 +163,7 @@ class ChallengeCardReal extends StatelessWidget {
                                 color: Colors.white,
                                 size: 25,
                               ),
-                              onPressed: () {
-                                print("Map button pressed");
-                              },
+                              onPressed: () => _checkLocation(context),
                             ),
                           ),
                         ],
@@ -111,17 +172,14 @@ class ChallengeCardReal extends StatelessWidget {
                   ],
                 ),
               ),
-              // Title and category with action buttons
               Padding(
                 padding: const EdgeInsets.only(left: 10.0, top: 5.0, bottom: 10.0),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Title and Action Buttons Row
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        // Challenge Title
                         Expanded(
                           child: Text(
                             title,
@@ -133,7 +191,6 @@ class ChallengeCardReal extends StatelessWidget {
                             overflow: TextOverflow.ellipsis,
                           ),
                         ),
-                        // Refresh and Trash Buttons
                         Row(
                           children: [
                             IconButton(
@@ -156,8 +213,6 @@ class ChallengeCardReal extends StatelessWidget {
                         ),
                       ],
                     ),
-                    const SizedBox(height: 5.0),
-                    // Category Row
                     Row(
                       children: [
                         const Icon(
